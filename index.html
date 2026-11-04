@@ -1,0 +1,880 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#46703A">
+<meta name="description" content="لعبة السياگ التقليدية بقواعد الجهة الشرقية">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SYAG">
+<style>html{color-scheme:light}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>السياگ - SYAG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;700&family=Tajawal:wght@400;500;700&display=swap">
+<style>
+/* Layout: compact top bar; throw tray and cactus-pad board side by side so both fit one phone screen; log, rules below */
+:root{
+  --bg:#E8E9DF; --surface:#F6F6F0; --ink:#1E2318; --muted:#5D6553; --line:#C9CCBC;
+  --pad:#6A9450; --pad-deep:#46703A; --hole:#24391C; --spine:rgba(250,248,225,.55);
+  --wood:#EADFC4; --wood-grain:#CDBE98; --kahla:#36522B; --kahla-grain:#25391D;
+  --date:#6D3A1E; --date-hi:#9A5A34; --fruit:#A6305C; --fruit-soft:#F3DCE5; --ok:#2F6B3A;
+  --display:"Reem Kufi","Tajawal",system-ui,sans-serif;
+  --body:"Tajawal",system-ui,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#15180F; --surface:#1E2217; --ink:#E9EBDF; --muted:#A1A895; --line:#353B2C;
+  --pad:#4F7A3C; --pad-deep:#33552A; --hole:#132010; --spine:rgba(230,240,200,.35);
+  --wood:#E3D6B6; --wood-grain:#BFAE86; --kahla:#3E5E31; --kahla-grain:#203219;
+  --date:#7A4323; --date-hi:#A8653B; --fruit:#E0628F; --fruit-soft:#3A1C28; --ok:#7CC48A;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#15180F; --surface:#1E2217; --ink:#E9EBDF; --muted:#A1A895; --line:#353B2C;
+  --pad:#4F7A3C; --pad-deep:#33552A; --hole:#132010; --spine:rgba(230,240,200,.35);
+  --wood:#E3D6B6; --wood-grain:#BFAE86; --kahla:#3E5E31; --kahla-grain:#203219;
+  --date:#7A4323; --date-hi:#A8653B; --fruit:#E0628F; --fruit-soft:#3A1C28; --ok:#7CC48A;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.app{max-width:860px;margin:0 auto;padding-block:10px 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:10px}
+button,select,input{font-family:var(--body);font-size:15px}
+.btn{border:0;border-radius:10px;padding:8px 14px;font-weight:700;cursor:pointer}
+.btn:focus-visible,select:focus-visible,.cell:focus-visible,.pchip:focus-visible,summary:focus-visible{outline:3px solid var(--fruit);outline-offset:2px}
+.btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+
+.top{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px}
+h1{font-family:var(--display);font-size:28px;line-height:1;margin:0}
+h1 .latin{font-family:var(--body);font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--muted);vertical-align:middle}
+.settings summary{list-style:none;cursor:pointer;border:1px solid var(--line);border-radius:10px;padding:6px 12px;font-weight:700;font-size:14px}
+.settings summary::-webkit-details-marker{display:none}
+.settings[open] summary{background:var(--surface)}
+.panel{position:absolute;inset-inline:0;top:calc(100% + 6px);z-index:15;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-wrap:wrap;gap:10px;box-shadow:0 12px 30px rgba(0,0,0,.18)}
+.panel label{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:2px;flex:1 1 150px}
+select,input[type=text]{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 8px;width:100%}
+input[type=text]:focus-visible{outline:3px solid var(--fruit);outline-offset:1px}
+.panel .row{display:flex;gap:8px;width:100%;justify-content:flex-end}
+
+.status{display:flex;gap:10px;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:6px 10px}
+.turn{display:flex;align-items:center;gap:8px;font-weight:700;min-width:0}
+.turn small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.token{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--pad-deep)}
+.count{font-size:12px;color:var(--muted);text-align:end;font-variant-numeric:tabular-nums;line-height:1.35}
+
+.play{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:stretch}
+.tray{display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px;--sw:20px;--sh:124px;min-width:0}
+.sticks{position:relative;height:160px;perspective:700px}
+.stick{width:var(--sw);height:var(--sh);position:absolute;left:calc(50% - var(--sw) / 2);top:calc((100% - var(--sh)) / 2);transform-origin:50% 50%;filter:drop-shadow(0 3px 2px rgba(0,0,0,.28))}
+.stick svg{width:100%;height:100%;display:block;overflow:visible}
+.stick.edge{width:calc(var(--sw) / 3)}
+.result{text-align:center;min-height:44px}
+.result .name{font-family:var(--display);font-size:22px;line-height:1.15}
+.result .meta{font-size:12px;color:var(--muted)}
+.result .meta b{color:var(--fruit)}
+.salia{color:var(--fruit)}
+.pool{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;min-height:28px;align-items:center}
+.pchip{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:2px 9px;font-size:13px;cursor:pointer;display:flex;gap:4px;align-items:baseline}
+.pchip b{font-variant-numeric:tabular-nums;color:var(--fruit)}
+.pchip.sel{background:var(--fruit);border-color:var(--fruit);color:#fff}
+.pchip.sel b{color:#fff}
+.pchip:disabled{opacity:.4;cursor:default}
+.pchip.idle{cursor:default}
+.hint{font-size:12px;color:var(--muted)}
+.total{font-size:12px;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums;min-height:18px}
+.btn-throw{background:var(--fruit);color:#fff;font-size:16px;padding:10px 8px;width:100%;margin-top:auto}
+.btn-throw:disabled{opacity:.45;cursor:default}
+
+.boardcol{display:flex;flex-direction:column;gap:6px;min-width:0}
+.pad{position:relative;width:100%;padding:12px 8px 16px;border-radius:46% 46% 40% 40% / 10% 10% 8% 8%;
+  background:radial-gradient(circle,var(--spine) 1px,transparent 1.6px) 0 0/18px 18px,radial-gradient(ellipse at 40% 30%,var(--pad),var(--pad-deep));
+  box-shadow:inset 0 -6px 18px rgba(0,0,0,.18),0 2px 0 var(--line)}
+.colnames{direction:ltr;display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center;color:#F4F2E2;font-size:11px;font-weight:700;margin-bottom:4px}
+.colnames span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.board{--rb:24px;--hb:16px;--pb:.8;--z:1;--zf:1;--row:calc(var(--rb) * var(--z) * var(--zf));--holed:calc(var(--hb) * var(--z) * var(--zf));--ps:calc(var(--pb) * var(--z) * var(--zf));direction:ltr;display:grid;grid-template-columns:1fr 1fr 10px 1fr 1fr;grid-template-rows:repeat(12,var(--row));row-gap:2px}
+.cell{position:relative;display:grid;place-items:center;border:0;background:none;padding:0;cursor:default}
+.cell::before{content:"";width:var(--holed);height:var(--holed);border-radius:50%;background:var(--hole);box-shadow:inset 0 2px 3px rgba(0,0,0,.55),0 1px 0 rgba(255,255,255,.15);position:absolute}
+.cell.dest::before{box-shadow:0 0 0 3px var(--fruit-soft),inset 0 2px 3px rgba(0,0,0,.55)}
+.cell.can{cursor:pointer}
+.cell.can::after{content:"";position:absolute;width:calc(var(--holed) + 7px);height:calc(var(--holed) + 7px);border-radius:50%;border:2px solid #fff;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.12);opacity:.5}}
+.pc{position:absolute;z-index:1}
+.board .pc{scale:var(--ps)}
+.pc.A{width:6px;height:22px;border-radius:3px;background:repeating-linear-gradient(0deg,var(--wood) 0 4px,var(--wood-grain) 4px 5px);transform:rotate(-24deg);box-shadow:0 1px 1px rgba(0,0,0,.4)}
+.pc.B{width:12px;height:20px;border-radius:50%;background:radial-gradient(ellipse at 35% 30%,var(--date-hi),var(--date));box-shadow:0 1px 1px rgba(0,0,0,.45)}
+.pc.B::after{content:"";position:absolute;left:50%;top:3px;bottom:3px;width:1px;background:rgba(0,0,0,.45)}
+.pc.second.A{transform:rotate(24deg)}
+.pc.second.B{transform:translateX(5px)}
+.board .pc.lift{scale:calc(var(--ps) * 1.4);filter:drop-shadow(0 5px 3px rgba(0,0,0,.5));z-index:3}
+.badge{position:absolute;z-index:2;top:-4px;right:0;background:var(--fruit);color:#fff;font-size:9px;font-weight:700;border-radius:8px;padding:0 3px;line-height:13px}
+.hit{position:absolute;z-index:6;bottom:calc(100% - 2px);background:var(--fruit);color:#fff;font-size:12px;font-weight:700;padding:1px 7px;border-radius:8px;white-space:nowrap;box-shadow:0 3px 8px rgba(0,0,0,.3);animation:hitpop 1.6s ease both}
+@keyframes hitpop{0%{transform:translateY(6px) scale(.6);opacity:0}15%{transform:none;opacity:1}85%{opacity:1}100%{opacity:0}}
+.zoom{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;color:var(--muted)}
+.zoom .zb{display:flex;gap:4px}
+.zoom button{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:18px;font-weight:700;line-height:1;cursor:pointer}
+.zoom button:disabled{opacity:.4;cursor:default}
+.zoom button:focus-visible{outline:3px solid var(--fruit);outline-offset:1px}
+.padwrap{overflow-x:auto}
+.play.focus{grid-template-columns:minmax(0,1fr)}
+.play.focus .sticks,.play.focus .result,.play.focus .btn-throw{display:none}
+.play.focus .tray{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;padding:8px}
+.play.focus .board{--zf:1.45}
+.play.focus .boardcol{width:100%;max-width:560px;margin-inline:auto}
+.check{flex-direction:row!important;align-items:center;gap:8px!important;flex-basis:100%!important;color:var(--ink)!important}
+.check input{width:18px;height:18px;accent-color:var(--fruit)}
+[hidden]{display:none!important}
+.pc.fly{position:fixed;z-index:30;pointer-events:none}
+.rtag{position:absolute;z-index:6;bottom:calc(100% - 4px);background:var(--ink);color:var(--bg);font-size:11px;font-weight:700;padding:0 6px;border-radius:7px;white-space:nowrap;pointer-events:none}
+.cheer .hitmsg{font-size:64px;color:#fff;background:var(--fruit);padding:6px 30px;animation:pop 1.8s ease both}
+.resume{position:fixed;inset:0;z-index:25;background:rgba(0,0,0,.45);display:grid;place-items:center;padding:16px}
+.rbox{background:var(--surface);color:var(--ink);border-radius:16px;padding:20px;max-width:360px;width:100%;display:flex;flex-direction:column;gap:10px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.rbox h2{font-family:var(--display);margin:0;font-size:22px}
+.rbox p{margin:0;color:var(--muted)}
+.rbtn{display:flex;flex-direction:column;gap:8px}
+.quick{display:flex;gap:8px;margin-top:-4px;flex-wrap:wrap;align-items:center}
+.langsel{width:auto!important;border-radius:999px!important;padding:4px 10px!important;font-size:13px!important;font-weight:700;background:var(--surface)!important}
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px}
+.tabs button{flex:1;border:0;background:transparent;color:var(--muted);font-weight:700;font-size:15px;padding:8px;border-radius:9px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--fruit);color:#fff}
+.tabs button:focus-visible{outline:3px solid var(--fruit);outline-offset:2px}
+.viewplay{display:flex;flex-direction:column;gap:10px}
+.learn{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.ltray{--sw:24px;--sh:150px}
+.ltray .sticks{height:190px}
+.lres{text-align:center;min-height:70px}
+.lres .name{font-family:var(--display);font-size:28px;line-height:1.15}
+.lres p{margin:4px 0;font-size:14px;max-width:60ch;margin-inline:auto}
+.lres .lt{font-weight:700}
+.lres .lstep{font-size:12px;color:var(--muted);margin:0}
+.lres .lshape{font-weight:700;color:var(--ink)}
+.lres .lt.w{color:var(--ok)}
+.lres .lt.l{color:var(--fruit)}
+#lSeq .hint{text-align:center;margin:4px 0 0}
+.steps{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 16px}
+.steps h2{font-family:var(--display);font-size:20px;margin:0 0 6px}
+.steps ol{margin:0;padding-inline-start:22px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+@media (min-width:720px){.learn{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.tg{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700;cursor:pointer}
+.tg .dot{width:10px;height:10px;border-radius:50%;background:var(--muted)}
+.tg[aria-pressed="true"] .dot{background:var(--fruit)}
+.tg:focus-visible{outline:3px solid var(--fruit);outline-offset:2px}
+.qura{display:flex;flex-direction:column;align-items:center;gap:2px}
+.bowl{position:relative;width:76px;min-height:92px;margin-top:24px;border-radius:24px 24px 16px 16px;background:linear-gradient(90deg,rgba(170,205,225,.35),rgba(255,255,255,.7) 35%,rgba(200,225,238,.3) 70%,rgba(150,190,212,.4));border:2px solid rgba(130,170,195,.85);box-shadow:inset 0 -10px 14px rgba(100,150,180,.28),0 4px 8px rgba(0,0,0,.12);display:flex;align-items:flex-end;justify-content:center;padding:8px 6px 10px;animation:bowlIn .5s cubic-bezier(.3,1.4,.6,1) both;transform-origin:50% 100%}
+.bowl::before{content:"";position:absolute;top:-25px;left:50%;width:24px;height:24px;margin-left:-12px;border:2px solid rgba(130,170,195,.85);border-bottom:0;border-radius:5px 5px 0 0;background:linear-gradient(90deg,rgba(170,205,225,.35),rgba(255,255,255,.7) 40%,rgba(150,190,212,.35))}
+.bowl::after{content:"";position:absolute;top:12px;left:10px;width:7px;height:46px;border-radius:6px;background:rgba(255,255,255,.65);pointer-events:none}
+.q-items{display:flex;flex-direction:column-reverse;gap:3px;align-items:center;position:relative;z-index:1}
+.q-items span{font-size:11px;font-weight:700;background:var(--fruit);color:#fff;border-radius:999px;padding:0 6px;line-height:17px;animation:drop .5s cubic-bezier(.3,1.4,.6,1) both}
+.q-label{font-size:11px;font-weight:700;color:var(--muted)}
+.qura.lost .bowl{animation:shake .45s ease,fadeout .8s .5s ease forwards}
+.qura.lost .q-label{color:var(--fruit)}
+.qura.pour .bowl{animation:pour .9s ease forwards}
+@keyframes bowlIn{from{transform:scale(.4);opacity:0}}
+@keyframes drop{from{transform:translateY(-34px);opacity:0}}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@keyframes fadeout{to{opacity:0;transform:scale(.7)}}
+@keyframes pour{45%{transform:rotate(-115deg) translateY(-6px)}100%{transform:rotate(-115deg) translateY(-6px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.bowl,.q-items span,.qura.lost .bowl,.qura.pour .bowl{animation:none}}
+.deadrow{direction:ltr;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.dead{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-height:30px;padding:4px 8px;border:1px dashed var(--line);border-radius:10px}
+.dead .n{font-size:12px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.dead .pc{position:relative;scale:.8}
+
+.cheer{position:fixed;inset:0;pointer-events:none;z-index:20;display:grid;place-items:center;overflow:hidden}
+.cheer .msg{font-family:var(--display);font-size:34px;background:var(--surface);color:var(--fruit);padding:12px 24px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:pop 2.8s ease both}
+@keyframes pop{0%{transform:scale(.6);opacity:0}12%{transform:scale(1.06);opacity:1}20%{transform:scale(1)}80%{opacity:1}100%{opacity:0}}
+.cheer i{position:absolute;top:-16px;width:8px;height:14px;border-radius:2px;animation:fall 2.8s linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(560deg)}}
+@media (prefers-reduced-motion:reduce){.cheer i{display:none}.cheer .msg,.hit{animation:none}.cell.can::after{animation:none}}
+
+.log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;font-size:13px}
+.log li{color:var(--muted)}.log li:first-child{color:var(--ink);font-weight:500}
+.log .cap{color:var(--fruit)}
+.win-banner{background:var(--fruit);color:#fff;border-radius:12px;padding:12px;text-align:center;font-family:var(--display);font-size:22px}
+details.rules{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+details.rules summary{cursor:pointer;font-weight:700}
+details.rules ul{padding-inline-start:20px;margin:8px 0 0;display:flex;flex-direction:column;gap:4px;font-size:14px}
+.legend{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chip{display:flex;align-items:center;gap:6px;font-size:12px;border:1px solid var(--line);border-radius:999px;padding:3px 8px 3px 6px;color:var(--muted)}
+.chip.win{border-color:var(--fruit);color:var(--ink)}
+.mini{display:flex;gap:2px}.mini i{width:4px;height:12px;border-radius:2px;display:block}
+.mini i.w{background:var(--wood);box-shadow:inset 0 0 0 1px var(--wood-grain)}.mini i.k{background:var(--kahla)}
+
+@media (min-width:720px){
+  .tray{--sw:28px;--sh:180px;padding:12px}
+  .sticks{height:230px}
+  .result .name{font-size:28px}
+  .board{--rb:31px;--hb:21px;--pb:1}
+  .pad{padding:18px 14px 22px}
+}
+</style>
+</head>
+<body>
+
+
+<div class="app" id="app" dir="rtl">
+  <header class="top">
+    <h1>السياگ <span class="latin">SYAG</span></h1>
+    <details class="settings">
+      <summary data-t="settings"></summary>
+      <div class="panel">
+        <label for="mode"><span data-t="mode"></span>
+          <select id="mode"><option value="ai" selected data-t="modeAI"></option><option value="pvp" data-t="modePvP"></option></select>
+        </label>
+        <label for="players"><span data-t="players"></span>
+          <select id="players"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
+        </label>
+        <label for="nameA"><span data-t="nameA"></span><input id="nameA" type="text" maxlength="18" autocomplete="off"></label>
+        <label for="nameB"><span data-t="nameB"></span><input id="nameB" type="text" maxlength="18" autocomplete="off"></label>
+        <label class="check" for="fxOn"><input type="checkbox" id="fxOn" checked> <span data-t="fxLabel"></span></label>
+        <label class="check" for="voiceOn"><input type="checkbox" id="voiceOn" checked> <span data-t="voiceLabel"></span></label>
+        <label class="check" for="autoFocus"><input type="checkbox" id="autoFocus" checked> <span data-t="autoFocus"></span></label>
+        <div class="row">
+          <button class="btn btn-ghost" id="newGame" type="button" data-t="newGame"></button>
+        </div>
+      </div>
+    </details>
+  </header>
+  <div class="quick">
+    <select id="lang" class="langsel" aria-label="Language / اللغة">
+      <option value="dar">الدارجة</option>
+      <option value="ar">العربية</option>
+      <option value="fr">Français</option>
+      <option value="en">English</option>
+    </select>
+    <button class="tg" id="soundBtn" type="button" aria-pressed="true"><span class="dot"></span><span id="soundTxt"></span></button>
+    <button class="tg" id="themeBtn" type="button"><span class="dot"></span><span id="themeTxt"></span></button>
+  </div>
+
+  <nav class="tabs" role="tablist">
+    <button type="button" role="tab" id="tabPlay" aria-selected="true" data-t="tabPlay"></button>
+    <button type="button" role="tab" id="tabLearn" aria-selected="false" data-t="tabLearn"></button>
+  </nav>
+
+  <section class="learn" id="viewLearn" hidden>
+    <div class="tray ltray">
+      <div class="sticks" id="lSticks"></div>
+      <div class="lres" id="lResult" aria-live="polite"></div>
+      <div id="lSeq"></div>
+      <button class="btn btn-throw" id="lThrow" type="button"></button>
+    </div>
+    <div class="steps">
+      <h2 data-t="stepsTitle"></h2>
+      <ol id="stepsList"></ol>
+    </div>
+  </section>
+
+  <div id="viewPlay" class="viewplay">
+  <section class="status" aria-live="polite">
+    <div class="turn"><span class="token" id="turnToken"></span><div><span id="turnName"></span><small id="turnPlayer"></small></div></div>
+    <div class="count" id="counts"></div>
+  </section>
+
+  <div id="winBox"></div>
+
+  <section class="play" id="play">
+    <div class="tray">
+      <div class="sticks" id="sticks"></div>
+      <div class="result" id="result" aria-live="polite"></div>
+      <div class="qura" id="qura" hidden><div class="bowl"><div class="q-items" id="quraItems"></div></div><span class="q-label" id="quraLabel"></span></div>
+      <div class="pool" id="pool"></div>
+      <div class="total" id="total"></div>
+      <button class="btn btn-throw" id="throwBtn" type="button"></button>
+    </div>
+    <div class="boardcol">
+      <div class="zoom"><span data-t="zoom"></span><span class="zb"><button type="button" id="zoomOut">−</button><button type="button" id="zoomIn">+</button></span></div>
+      <div class="padwrap"><div class="pad">
+        <div class="colnames"><span id="colB"></span><span id="colA"></span></div>
+        <div class="board" id="board"></div>
+      </div></div>
+      <div class="deadrow">
+        <div class="dead" id="deadB"></div>
+        <div class="dead" id="deadA"></div>
+      </div>
+    </div>
+  </section>
+
+  <ul class="log" id="log"></ul>
+  </div>
+  <div class="resume" id="resume" hidden><div class="rbox" role="dialog" aria-modal="true" aria-labelledby="resumeTitle"><h2 id="resumeTitle" data-t="resumeTitle"></h2><p id="resumeInfo"></p><div class="rbtn"><button class="btn btn-throw" id="resumeBtn" type="button" data-t="resumeBtn"></button><button class="btn btn-ghost" id="freshBtn" type="button" data-t="newGame"></button></div></div></div>
+
+  <details class="rules">
+    <summary data-t="rules"></summary>
+    <ul id="rulesList"></ul>
+    <div class="legend" id="legend"></div>
+  </details>
+</div>
+
+<script>
+(function(){
+  const I18N={
+  dar:{dir:'rtl',voice:'ar-MA',
+   names:{1:'سيگ',2:'إيشو',3:'دار ثلاث',4:'أربعة',6:'ستة'},
+   speak:{1:'سِيكْ',2:'إِيشُو',3:'دارْ ثْلاثْ',4:'أَرْبْعَة',6:'سْتَّة'},
+   settings:'الإعدادات',mode:'اللعب',modeAI:'ضد التيليفون (الفريق 2)',modePvP:'لاعب ضد لاعب (فنفس التيليفون)',players:'لاعبين فكل فريق',nameA:'سمية الفريق 1 (العيدان)',nameB:'سمية الفريق 2 (النوى)',autoFocus:'كبّر اللوحة على الشاشة كاملة ملي كتحط النتائج',newGame:'طرح جديد',
+   fxLabel:'المؤثرات الصوتية (رمي السياگ، التصفيق، الزغاريد...)',voiceLabel:'الصوت ديال الكلام (النتائج، الدور، عليه!)',soundOn:'الصوت مشعول',soundOff:'الصوت مطفي',themeDark:'الوضع الليلي',themeLight:'الوضع النهاري',tabPlay:'اللعب',tabLearn:'التعلّم',zoom:'حجم اللوحة',zoomIn:'كبّر اللوحة',zoomOut:'صغّر اللوحة',rules:'القواعد',stepsTitle:'كيفاش كتلعب السياگ',
+   qura:'القرعة',quraLost:'ضاعت القرعة',poolHint:'النتائج كتتجمع هنا',total:'المجموع',throw:'ارمي السياگ',throwAgain:'عاود ارمي السياگ',pickResult:'ختار نتيجة وولد',aiPlacing:'التيليفون كيحط',startHint:'ارمي السياگ باش تبدا',
+   metaQura:'تحطّت فالقرعة، عاود ارمي',metaWin:'رابحة، عاود ارمي',metaPlace:'حط النتائج على الأولاد',salia:'صلية!',saliaMeta:'عود وقف على الجنب',saliaSay:'صَلْيَة',
+   turnOf:'الدور على {n}',phonePlays:'التيليفون كيلعب',playerN:'اللاعب {i} من {n}',counts:'{a} ولد · {s} سالم',ate:'{t} كلا {n}',win:'ربح {t}!',hit:'عليه!',hitSay:'عْلِيهْ!',cellEmpty:'ثقبة خاوية',cellPieces:'{n} ولد ديال {t}',
+   defA:'الفريق 1',defB:'الفريق 2',phone:'التيليفون',turnSay:'هادا دور {n}',playerSay:'{t}، اللاعب {i}',
+   resumeTitle:'كاين طرح ما كملش',resumeInfo:'الدور على {t}. باقيين {a} ولد عند {A} و{b} عند {B}.',resumeBtn:'كمّل الطرح اللي فات',
+   logStart:'كيبدا {t}. كل ولد خاصو سيگ باش يسلّم.',logGot:'{t} جاب {r}',logToQura:'{r} تحطّت فالقرعة',logQuraLost:'ما جاش السيگ، ضاعت القرعة',logNoSalem:'{t} ما عندو حتى سالم، خاصو سيگ',logQuraOut:'خرجو النتائج من القرعة',logSalia:'صلية: العود تعاود',logCollected:'{t} جمع: {s}',logNone:'حتى نتيجة ما تقدر تتحط',
+   logFirstSalem:'{t} سلّم أول ولد!',logSalem:'{t} سلّم ولد ({n} من 12)',logAllSalem:'{t} سلّم الأولاد كاملين!',cheerFirst:'{t} سلّم!',logPlaced:'{t} حط {r}',withJran:' بالجران',splitJran:' وفرّق الجران',logJran:'{t} دار جران',
+   logKill:'{t}: عليه! قتل {w} ديال {o}',oneOuld:'ولد',nOuld:'{n} أولاد (جران)',logOver:'سالات اللعبة',logLeft:'ما بقا فين يتحط: {s}',blocked:'ما كاين حتى ولد يقدر يتحرك بهاد النتيجة',routeIn:'يدخل',routeLoop:'يرجع',chooseRoute:'ختار: يدخل للواد ديال الخصم ولا يرجع للواد الداخلي ديالك',goal:'<b>الهدف:</b> تنقص الأولاد ديال الخصم ولا تخليه بلا أولاد. كل واحد والخطة ديالو: تدخل للواد ديال الخصم وتهجم، ولا تستنى وتحمي الأولاد ديالك باش ما يمشيوش ليك.',routeRule:'ملي كيسلمو الأولاد كاملين، الدخول للواد ديال الخصم ماشي إجباري: فاش كيوصل الولد لراس الواد الداخلي ديال الخصم، كتختار واش يدخل للواد ديالو ولا يرجع للواد الداخلي ديالك.',
+   learnIntro:'كليكي على البوطونة باش تشوف النتائج وحدة بوحدة: الرابحين اللولين (سيگ، أربعة، ستة)، ومن بعد الخاسرين (إيشو، دار ثلاث).',stepOf:'المثال {i} من 5',
+   shape:{1:'شكل السياگ: 3 كحلين وواحد بيض',2:'شكل السياگ: جوج بيض وجوج كحلين',3:'شكل السياگ: 3 بيضين وواحد كحل',4:'شكل السياگ: 4 بيضين',6:'شكل السياگ: 4 كحلين'},
+   tip:{1:['سيگ: نقطة وحدة، ورمية رابحة','كتعاود ترمي مباشرة. السيگ هو المفتاح: بيه كيسلّم الولد. قبل ما يسلمو الأولاد كاملين (12 سيگ)، السيگ كيصلح غير للسلم.'],
+    2:['إيشو: جوج نقاط، ورمية خاسرة','الرمية كتوقف هنا، ولكن النقطتين ماشي ضايعين: كتحطهم على ولد سالم مع النتائج اللي جمعتي. يعني الإيشو خاسر فالرمي ولكن رابح فالحركة.'],
+    3:['دار ثلاث: ثلاثة نقاط، ورمية خاسرة','الرمية كتوقف، ومن بعد كتحط الثلاثة نقاط مع النتائج اللي جمعتي على ولد سالم.'],
+    4:['أربعة: أربعة نقاط، ورمية رابحة','كتعاود ترمي وكتجمع. إلا ما عندك حتى سالم، الأربعة كتمشي للقرعة وكتستنى السيگ.'],
+    6:['ستة: ستة نقاط، ورمية رابحة','أكبر نتيجة. كتعاود ترمي وكتجمع. إلا ما عندك حتى سالم، كتمشي للقرعة.']},
+   seqDone:'سالات الرمية: {s}. المجموع {n}، ولكن كل نتيجة كتتحط بوحدها على ولد سالم، وبالترتيب اللي بغيتي.',seqNewTurn:'دور جديد بدا بدار ثلاث وسالا فيها مباشرة: كتحط الثلاثة وكتدوز اليد.',seqGoing:'المجموع حتى لدابا: {n}. باقي الدور ديالك، عاود ارمي.',
+   learnRestart:'عاود الأمثلة من اللول',learnNext:'المثال الجاي: {r}',learnFirst:'ارمي السياگ: {r}',
+   rulesHTML:['4 ديال السياگ ديال الزيتون: جيهة بيضاء وجيهة كحلة.','سيگ (3 كحلين وواحد بيض) = 1، إيشو (2 و2) = 2، دار ثلاث (3 بيضين وواحد كحل) = 3، أربعة (4 بيضين) = 4، ستة (4 كحلين) = 6.','السيگ والأربعة والستة رابحين: الفريق كيعاود يرمي بلا ما يحط وكيجمع. إيشو ودار ثلاث خاسرين: كتوقف الرمية وكيحط الفريق داكشي اللي جمع.','كل نتيجة كتتحط بوحدها، والفريق كيختار الولد والترتيب. مثلا سيگين، أربعة، ستة، إيشو: المجموع 14، ولكن كل وحدة كتتلعب بوحدها.','كل فريق عندو 12 ولد. الولد اللي تفتح بالسيگ كيولي سالم، وغير السالمين اللي كيتحركو بالنتائج الأخرى.','قبل ما يسلمو الأولاد كاملين (12 سيگ)، السيگ كيصلح غير للسلم، والسالمين كيدورو غير فالوديان الداخلية.','ملي كيسلمو كاملين، كيدخلو للواد ديال الخصم من الفوق وكيبداو ياكلو، وكيبقاو ديما كيدورو فجيهة الخصم.','جوج أولاد ديال نفس الفريق ما يمكنش يكونو فنفس الثقبة. إلا الحساب جاب الولد فبلاصة خوه، كيتحبس وكتحرك واحد آخر.','الجران: من بعد ما يسلمو الأولاد كاملين، تقدر تجمع جوج سالمين فثقبة وحدة. كيتحركو مع بعض وما كيتفرقوش حتى تجيب سيگ. إلا طاح عليهم الخصم كيقتل الجوج.','إلا طحتي بالضبط فثقبة فيها أولاد ديال الخصم: عليه! كتاكلهم، وكيتجمعو فجيهتك.','القرعة: إلا ما عندك حتى سالم، الأربعة والستة كيتحطو فالقرعة. إلا جاك سيگ فنفس الدور كتلعبهم، وإلا لا كيضيعو.','الصلية: إلا وقف شي عود على الجنب كيتعاود. نادرة وعشوائية.','كيربح الفريق اللي كمّل الأولاد ديال الخصم.'],
+   stepsHTML:['<b>السياگ:</b> 4 عواد ديال الزيتون، جيهة بيضاء وجيهة كحلة. كل رمية كتعطي وحدة من 5 النتائج.','<b>الرابحين والخاسرين:</b> السيگ والأربعة والستة رابحين، كتعاود ترمي وكتجمع. الإيشو ودار ثلاث خاسرين، كتوقف الرمية، ولكن حتى هوما كيتحطو.','<b>الأولاد:</b> كل فريق عندو 12 ولد فالواد ديالو. الولد ما كيتحركش حتى تجيبلو سيگ، ومن تما كيولي سالم.','<b>السلم:</b> قبل ما يسلمو الأولاد كاملين، السيگ كيصلح غير للسلم، والسالمين كيدورو غير فالوديان الداخلية.','<b>الهجوم:</b> ملي كيسلمو كاملين، كيدخلو للواد ديال الخصم. إلا طحتي بالضبط على ولد ديالو: عليه!','<b>الجران:</b> جوج سالمين فثقبة وحدة كيتحركو مع بعض، وباش تفرقهم خاصك سيگ.','<b>القرعة:</b> إلا ما عندك حتى سالم، الأربعة والستة كيتحطو فالقرعة حتى يجي السيگ.','<b>الربح:</b> اللي كمّل الأولاد ديال الخصم هو اللي ربح.']},
+  ar:{dir:'rtl',voice:'ar',
+   names:{1:'سيگ',2:'إيشو',3:'دار ثلاث',4:'أربعة',6:'ستة'},
+   speak:{1:'سِيكْ',2:'إِيشُو',3:'دارُ ثَلاث',4:'أَرْبَعَة',6:'سِتَّة'},
+   settings:'الإعدادات',mode:'نمط اللعب',modeAI:'ضد الهاتف (الفريق 2)',modePvP:'لاعب ضد لاعب (على نفس الهاتف)',players:'عدد اللاعبين في كل فريق',nameA:'اسم الفريق 1 (العيدان)',nameB:'اسم الفريق 2 (النوى)',autoFocus:'تكبير اللوحة على كامل الشاشة عند وضع النتائج',newGame:'جولة جديدة',
+   fxLabel:'المؤثرات الصوتية (رمي السياگ، التصفيق، الزغاريد...)',voiceLabel:'الصوت المنطوق (النتائج، الدور، عليه!)',soundOn:'الصوت مفعّل',soundOff:'الصوت متوقف',themeDark:'الوضع الليلي',themeLight:'الوضع النهاري',tabPlay:'اللعب',tabLearn:'التعلّم',zoom:'حجم اللوحة',zoomIn:'تكبير اللوحة',zoomOut:'تصغير اللوحة',rules:'القواعد',stepsTitle:'كيف تُلعب السياگ',
+   qura:'القرعة',quraLost:'ضاعت القرعة',poolHint:'تتجمع النتائج هنا',total:'المجموع',throw:'ارمِ السياگ',throwAgain:'أعد رمي السياگ',pickResult:'اختر نتيجة وولدًا',aiPlacing:'الهاتف يضع النتائج',startHint:'ارمِ السياگ لتبدأ',
+   metaQura:'وُضعت في القرعة، أعد الرمي',metaWin:'رمية رابحة، أعد الرمي',metaPlace:'ضع النتائج على الأولاد',salia:'صلية!',saliaMeta:'عود وقف على جانبه',saliaSay:'صَلْيَة',
+   turnOf:'الدور على {n}',phonePlays:'الهاتف يلعب',playerN:'اللاعب {i} من {n}',counts:'{a} ولد · {s} سالم',ate:'{t} أكل {n}',win:'فاز {t}!',hit:'عليه!',hitSay:'عَلَيْه!',cellEmpty:'ثقب فارغ',cellPieces:'{n} ولد لـ{t}',
+   defA:'الفريق 1',defB:'الفريق 2',phone:'الهاتف',turnSay:'إنه دور {n}',playerSay:'{t}، اللاعب {i}',
+   resumeTitle:'هناك جولة لم تكتمل',resumeInfo:'الدور على {t}. بقي {a} ولد لـ{A} و{b} لـ{B}.',resumeBtn:'أكمل الجولة السابقة',
+   logStart:'يبدأ {t}. يحتاج كل ولد إلى سيگ ليصبح سالمًا.',logGot:'{t} حصل على {r}',logToQura:'{r} وُضعت في القرعة',logQuraLost:'لم يأتِ السيگ، ضاعت القرعة',logNoSalem:'{t} ليس لديه أي سالم، يحتاج إلى سيگ',logQuraOut:'خرجت النتائج من القرعة',logSalia:'صلية: أُعيد رمي العود',logCollected:'{t} جمع: {s}',logNone:'لا يمكن وضع أي نتيجة',
+   logFirstSalem:'{t} سلّم أول ولد!',logSalem:'{t} سلّم ولدًا ({n} من 12)',logAllSalem:'{t} سلّم جميع الأولاد!',cheerFirst:'{t} سلّم!',logPlaced:'{t} وضع {r}',withJran:' بالجران',splitJran:' وفرّق الجران',logJran:'{t} شكّل جرانًا',
+   logKill:'{t}: عليه! قتل {w} من {o}',oneOuld:'ولدًا',nOuld:'{n} أولاد (جران)',logOver:'انتهت اللعبة',logLeft:'لا مكان لوضع: {s}',blocked:'لا يوجد ولد يمكنه التحرك بهذه النتيجة',routeIn:'يدخل',routeLoop:'يعود',chooseRoute:'اختر: يدخل وادي الخصم أو يعود إلى واديك الداخلي',goal:'<b>الهدف:</b> أن تُنقص أولاد الخصم أو تتركه بلا أولاد. ولكلٍّ خطته: أن تدخل وادي الخصم وتهاجم، أو أن تنتظر وتحمي أولادك كي لا تفقدهم.',routeRule:'بعد تسليم جميع الأولاد، دخول وادي الخصم ليس إجباريًا: حين يصل الولد إلى رأس الوادي الداخلي للخصم، تختار أن يدخل واديه أو يعود إلى واديك الداخلي.',
+   learnIntro:'اضغط على الزر لترى النتائج واحدة تلو الأخرى: الرابحة أولًا (سيگ، أربعة، ستة)، ثم الخاسرة (إيشو، دار ثلاث).',stepOf:'المثال {i} من 5',
+   shape:{1:'شكل السياگ: 3 داكنة وواحد أبيض',2:'شكل السياگ: اثنان أبيضان واثنان داكنان',3:'شكل السياگ: 3 بيضاء وواحد داكن',4:'شكل السياگ: 4 بيضاء',6:'شكل السياگ: 4 داكنة'},
+   tip:{1:['سيگ: نقطة واحدة، ورمية رابحة','تعيد الرمي مباشرة. السيگ هو المفتاح: به يسلّم الولد. قبل أن يسلم جميع الأولاد (12 سيگ)، لا يصلح السيگ إلا للتسليم.'],
+    2:['إيشو: نقطتان، ورمية خاسرة','تتوقف الرمية هنا، لكن النقطتين لا تضيعان: تضعهما على ولد سالم مع ما جمعته. فالإيشو خاسر في الرمي ورابح في الحركة.'],
+    3:['دار ثلاث: ثلاث نقاط، ورمية خاسرة','تتوقف الرمية، ثم تضع النقاط الثلاث مع ما جمعته على ولد سالم.'],
+    4:['أربعة: أربع نقاط، ورمية رابحة','تعيد الرمي وتجمع. إن لم يكن لديك أي سالم، تذهب الأربعة إلى القرعة وتنتظر السيگ.'],
+    6:['ستة: ست نقاط، ورمية رابحة','أكبر نتيجة. تعيد الرمي وتجمع. إن لم يكن لديك أي سالم، تذهب إلى القرعة.']},
+   seqDone:'انتهت الرمية: {s}. المجموع {n}، لكن كل نتيجة توضع وحدها على ولد سالم، وبالترتيب الذي تختاره.',seqNewTurn:'دور جديد بدأ بدار ثلاث وانتهى فورًا: تضع الثلاث وينتقل الدور.',seqGoing:'المجموع حتى الآن: {n}. ما زال دورك، أعد الرمي.',
+   learnRestart:'أعد الأمثلة من البداية',learnNext:'المثال التالي: {r}',learnFirst:'ارمِ السياگ: {r}',
+   rulesHTML:['أربعة عيدان من الزيتون: وجه أبيض ووجه داكن.','سيگ (3 داكنة وواحد أبيض) = 1، إيشو (2 و2) = 2، دار ثلاث (3 بيضاء وواحد داكن) = 3، أربعة (4 بيضاء) = 4، ستة (4 داكنة) = 6.','السيگ والأربعة والستة رابحة: يعيد الفريق الرمي دون أن يضع ويجمع النتائج. الإيشو ودار ثلاث خاسرتان: تتوقف الرمية ويضع الفريق ما جمعه.','توضع كل نتيجة وحدها، ويختار الفريق الولد والترتيب. مثلًا: سيگان، أربعة، ستة، إيشو: المجموع 14، لكن كل واحدة تُلعب وحدها.','لكل فريق 12 ولدًا. الولد الذي يُفتح بالسيگ يصبح سالمًا، ولا يتحرك بالنتائج الأخرى إلا السالمون.','قبل أن يسلم جميع الأولاد (12 سيگ)، لا يصلح السيگ إلا للتسليم، ويدور السالمون في الوديان الداخلية فقط.','بعد تسليم الجميع، يدخلون وادي الخصم من الأعلى ويبدؤون الأكل، ويبقون يدورون في جهة الخصم.','لا يمكن أن يكون ولدان من الفريق نفسه في الثقب نفسه. إن أوصل الحساب الولد إلى مكان أخيه، يُحبس ويتحرك ولد آخر.','الجران: بعد تسليم جميع الأولاد، يمكنك جمع سالمَين في ثقب واحد. يتحركان معًا ولا يفترقان إلا بسيگ. وإن وقع عليهما الخصم قتلهما معًا.','إن وقعت تمامًا في ثقب فيه أولاد الخصم: عليه! تأكلهم، ويُجمعون في جهتك.','القرعة: إن لم يكن لديك أي سالم، توضع الأربعة والستة في القرعة. إن جاء سيگ في الدور نفسه تلعبها، وإلا ضاعت.','الصلية: إن وقف عود على جانبه يُعاد رميه. وهي نادرة وعشوائية.','يفوز الفريق الذي يقضي على جميع أولاد الخصم.'],
+   stepsHTML:['<b>السياگ:</b> أربعة عيدان من الزيتون، وجه أبيض ووجه داكن. كل رمية تعطي إحدى النتائج الخمس.','<b>الرابحة والخاسرة:</b> السيگ والأربعة والستة رابحة، تعيد الرمي وتجمع. الإيشو ودار ثلاث خاسرتان، تتوقف الرمية، لكنهما توضعان أيضًا.','<b>الأولاد:</b> لكل فريق 12 ولدًا في واديه. لا يتحرك الولد حتى تحصل له على سيگ، فيصبح سالمًا.','<b>التسليم:</b> قبل تسليم الجميع، لا يصلح السيگ إلا للتسليم، ويدور السالمون في الوديان الداخلية فقط.','<b>الهجوم:</b> بعد تسليم الجميع، يدخلون وادي الخصم. إن وقعت تمامًا على ولده: عليه!','<b>الجران:</b> سالمان في ثقب واحد يتحركان معًا، ولتفريقهما تحتاج إلى سيگ.','<b>القرعة:</b> إن لم يكن لديك أي سالم، توضع الأربعة والستة في القرعة حتى يأتي السيگ.','<b>الفوز:</b> من يقضي على جميع أولاد الخصم يفوز.']},
+  fr:{dir:'ltr',voice:'fr',
+   names:{1:'Sig',2:'Ichou',3:'Dar tlet',4:'Quatre',6:'Six'},
+   speak:{1:'Sig',2:'Ichou',3:'Dar tlett',4:'Quatre',6:'Six'},
+   settings:'Réglages',mode:'Mode de jeu',modeAI:'Contre le téléphone (équipe 2)',modePvP:'Joueur contre joueur (même téléphone)',players:'Joueurs par équipe',nameA:'Nom de l’équipe 1 (bâtonnets)',nameB:'Nom de l’équipe 2 (noyaux de dattes)',autoFocus:'Agrandir la feuille en plein écran pour placer les résultats',newGame:'Nouvelle partie',
+   fxLabel:'Effets sonores (lancer des siyag, applaudissements, youyous…)',voiceLabel:'Voix (résultats, tour du joueur, Touché !)',soundOn:'Son activé',soundOff:'Son coupé',themeDark:'Mode nuit',themeLight:'Mode jour',tabPlay:'Jouer',tabLearn:'Apprendre',zoom:'Taille de la feuille',zoomIn:'Agrandir la feuille',zoomOut:'Réduire la feuille',rules:'Règles',stepsTitle:'Comment jouer au Syag',
+   qura:'La guerâa (la bouteille)',quraLost:'Bouteille perdue',poolHint:'Les résultats s’accumulent ici',total:'Total',throw:'Lancer les siyag',throwAgain:'Relancer les siyag',pickResult:'Choisis un résultat et un ould',aiPlacing:'Le téléphone place',startHint:'Lance les siyag pour commencer',
+   metaQura:'Dans la bouteille, relance',metaWin:'Gagnant, relance',metaPlace:'Place les résultats sur tes ouled',salia:'Salia !',saliaMeta:'Un bâtonnet est tombé sur la tranche',saliaSay:'Salia',
+   turnOf:'Au tour de {n}',phonePlays:'Le téléphone joue',playerN:'Joueur {i} sur {n}',counts:'{a} ouled · {s} salem',ate:'{t} a mangé {n}',win:'{t} a gagné !',hit:'Touché !',hitSay:'Touché !',cellEmpty:'Trou vide',cellPieces:'{n} ould de {t}',
+   defA:'Équipe 1',defB:'Équipe 2',phone:'le téléphone',turnSay:'C’est au tour de {n}',playerSay:'{t}, joueur {i}',
+   resumeTitle:'Une partie n’est pas terminée',resumeInfo:'C’est au tour de {t}. Il reste {a} ouled à {A} et {b} à {B}.',resumeBtn:'Continuer la partie',
+   logStart:'{t} commence. Chaque ould a besoin d’un sig pour devenir salem.',logGot:'{t} : {r}',logToQura:'{r} va dans la bouteille',logQuraLost:'Pas de sig : la bouteille est perdue',logNoSalem:'{t} n’a aucun salem, il lui faut un sig',logQuraOut:'Les résultats sortent de la bouteille',logSalia:'Salia : le bâtonnet est relancé',logCollected:'{t} a cumulé : {s}',logNone:'Aucun résultat ne peut être placé',
+   logFirstSalem:'{t} : premier ould salem !',logSalem:'{t} : un ould devient salem ({n}/12)',logAllSalem:'{t} : tous les ouled sont salem !',cheerFirst:'{t} : salem !',logPlaced:'{t} place {r}',withJran:' avec le jrane',splitJran:' et sépare le jrane',logJran:'{t} forme un jrane',
+   logKill:'{t} : touché ! Il mange {w} de {o}',oneOuld:'un ould',nOuld:'{n} ouled (jrane)',logOver:'Partie terminée',logLeft:'Impossible à placer : {s}',blocked:'Aucun ould ne peut bouger avec ce résultat',routeIn:'Entrer',routeLoop:'Rester',chooseRoute:'Choisis : entrer dans la ligne de l’adversaire ou revenir dans ta ligne intérieure',goal:'<b>Le but :</b> réduire les ouled de l’adversaire, jusqu’à le laisser sans aucun. À toi de choisir ta stratégie : entrer dans sa ligne pour attaquer, ou attendre et protéger tes ouled pour ne pas les perdre.',routeRule:'Quand les 12 sont salem, entrer dans la ligne de l’adversaire n’est pas obligatoire : en haut de sa ligne intérieure, tu choisis d’entrer chez lui ou de revenir dans ta ligne intérieure.',
+   learnIntro:'Appuie sur le bouton pour voir les résultats un par un : d’abord les gagnants (Sig, Quatre, Six), puis les perdants (Ichou, Dar tlet).',stepOf:'Exemple {i} sur 5',
+   shape:{1:'Les siyag : 3 foncés et 1 blanc',2:'Les siyag : 2 blancs et 2 foncés',3:'Les siyag : 3 blancs et 1 foncé',4:'Les siyag : 4 blancs',6:'Les siyag : 4 foncés'},
+   tip:{1:['Sig : 1 point, lancer gagnant','Tu relances tout de suite. Le sig est la clé : il rend un ould salem. Tant que tes 12 ouled ne sont pas salem, le sig ne sert qu’à ça.'],
+    2:['Ichou : 2 points, lancer perdant','Le lancer s’arrête ici, mais les 2 points ne sont pas perdus : tu les places sur un ould salem avec ce que tu as cumulé. L’ichou fait perdre le lancer mais fait quand même avancer.'],
+    3:['Dar tlet : 3 points, lancer perdant','Le lancer s’arrête, puis tu places les 3 points avec ce que tu as cumulé sur un ould salem.'],
+    4:['Quatre : 4 points, lancer gagnant','Tu relances et tu cumules. Si tu n’as aucun salem, le quatre va dans la bouteille et attend un sig.'],
+    6:['Six : 6 points, lancer gagnant','Le plus gros résultat. Tu relances et tu cumules. Si tu n’as aucun salem, il va dans la bouteille.']},
+   seqDone:'Fin du lancer : {s}. Total {n}, mais chaque résultat se place séparément sur un ould salem, dans l’ordre que tu veux.',seqNewTurn:'Nouveau tour qui commence par un dar tlet et s’arrête aussitôt : tu places les 3 et la main passe.',seqGoing:'Total pour l’instant : {n}. C’est toujours ton tour, relance.',
+   learnRestart:'Recommencer les exemples',learnNext:'Exemple suivant : {r}',learnFirst:'Lancer : {r}',
+   rulesHTML:['4 siyag en bois d’olivier : une face blanche et une face foncée.','Sig (3 foncés, 1 blanc) = 1, Ichou (2 et 2) = 2, Dar tlet (3 blancs, 1 foncé) = 3, Quatre (4 blancs) = 4, Six (4 foncés) = 6.','Sig, Quatre et Six sont gagnants : l’équipe relance sans placer et cumule. Ichou et Dar tlet sont perdants : le lancer s’arrête et l’équipe place ce qu’elle a cumulé.','Chaque résultat se place séparément, et l’équipe choisit l’ould et l’ordre. Par exemple 2 × Sig, Quatre, Six, Ichou : total 14, mais chacun se joue à part.','Chaque équipe a 12 ouled. Un ould ouvert avec un sig devient salem, et seuls les salem bougent avec les autres résultats.','Tant que les 12 ouled ne sont pas salem, le sig sert seulement à ouvrir un ould, et les salem tournent seulement dans les deux lignes intérieures.','Quand les 12 sont salem, ils entrent dans la ligne de l’adversaire par le haut et commencent à manger, en tournant toujours de son côté.','Deux ouled de la même équipe ne peuvent pas être dans le même trou. Si le compte fait tomber un ould sur son frère, il est bloqué et on en bouge un autre.','Le jrane : quand les 12 sont salem, tu peux réunir deux salem dans un trou. Ils avancent ensemble et ne se séparent qu’avec un sig. Si l’adversaire tombe dessus, il mange les deux.','Si tu tombes pile sur des ouled de l’adversaire : touché ! Tu les manges et ils rejoignent ton côté.','La guerâa (la bouteille) : si tu n’as aucun salem, les quatre et les six vont dans la bouteille. Si un sig arrive dans le même tour, tu les joues, sinon ils sont perdus.','La salia : si un bâtonnet tombe sur la tranche, on le relance. C’est rare et aléatoire.','L’équipe qui élimine tous les ouled de l’adversaire gagne.'],
+   stepsHTML:['<b>Les siyag :</b> 4 bâtonnets d’olivier, une face blanche et une face foncée. Chaque lancer donne un des 5 résultats.','<b>Gagnants et perdants :</b> Sig, Quatre et Six sont gagnants : tu relances et tu cumules. Ichou et Dar tlet sont perdants : le lancer s’arrête, mais ils se placent aussi.','<b>Les ouled :</b> chaque équipe a 12 ouled dans sa ligne. Un ould ne bouge pas tant qu’il n’a pas reçu un sig ; il devient alors salem.','<b>Le sellem :</b> tant que les 12 ne sont pas salem, le sig sert seulement à ouvrir, et les salem tournent dans les lignes intérieures.','<b>L’attaque :</b> quand les 12 sont salem, ils entrent chez l’adversaire. Si tu tombes pile sur un de ses ouled : touché !','<b>Le jrane :</b> deux salem dans le même trou avancent ensemble ; il faut un sig pour les séparer.','<b>La guerâa :</b> sans aucun salem, les quatre et les six vont dans la bouteille en attendant un sig.','<b>La victoire :</b> celui qui élimine tous les ouled de l’adversaire gagne.']},
+  en:{dir:'ltr',voice:'en',
+   names:{1:'Sig',2:'Ishou',3:'Dar tlet',4:'Four',6:'Six'},
+   speak:{1:'Seeg',2:'Ishoo',3:'Dar tlet',4:'Four',6:'Six'},
+   settings:'Settings',mode:'Game mode',modeAI:'Against the phone (team 2)',modePvP:'Player vs player (same phone)',players:'Players per team',nameA:'Team 1 name (sticks)',nameB:'Team 2 name (date pits)',autoFocus:'Enlarge the board to full screen when placing results',newGame:'New game',
+   fxLabel:'Sound effects (siyag throws, applause, cheers…)',voiceLabel:'Voice (results, whose turn, Got him!)',soundOn:'Sound on',soundOff:'Sound off',themeDark:'Night mode',themeLight:'Day mode',tabPlay:'Play',tabLearn:'Learn',zoom:'Board size',zoomIn:'Enlarge the board',zoomOut:'Shrink the board',rules:'Rules',stepsTitle:'How to play Syag',
+   qura:'The guer3a (glass bottle)',quraLost:'Bottle lost',poolHint:'Results collect here',total:'Total',throw:'Throw the siyag',throwAgain:'Throw again',pickResult:'Pick a result and an ould',aiPlacing:'The phone is placing',startHint:'Throw the siyag to start',
+   metaQura:'Into the bottle, throw again',metaWin:'Winning throw, throw again',metaPlace:'Place the results on your ouled',salia:'Salia!',saliaMeta:'A stick landed on its edge',saliaSay:'Salia',
+   turnOf:'{n}’s turn',phonePlays:'The phone is playing',playerN:'Player {i} of {n}',counts:'{a} ouled · {s} salem',ate:'{t} took {n}',win:'{t} wins!',hit:'Got him!',hitSay:'Got him!',cellEmpty:'Empty hole',cellPieces:'{n} ould of {t}',
+   defA:'Team 1',defB:'Team 2',phone:'the phone',turnSay:'It’s {n}’s turn',playerSay:'{t}, player {i}',
+   resumeTitle:'You have an unfinished game',resumeInfo:'It’s {t}’s turn. {A} has {a} ouled left and {B} has {b}.',resumeBtn:'Continue the game',
+   logStart:'{t} starts. Each ould needs a sig to become salem.',logGot:'{t}: {r}',logToQura:'{r} goes into the bottle',logQuraLost:'No sig: the bottle is lost',logNoSalem:'{t} has no salem and needs a sig',logQuraOut:'The results come out of the bottle',logSalia:'Salia: the stick is rethrown',logCollected:'{t} collected: {s}',logNone:'No result can be placed',
+   logFirstSalem:'{t}: first ould is salem!',logSalem:'{t}: an ould becomes salem ({n}/12)',logAllSalem:'{t}: all ouled are salem!',cheerFirst:'{t}: salem!',logPlaced:'{t} places {r}',withJran:' with the jrane',splitJran:' and splits the jrane',logJran:'{t} forms a jrane',
+   logKill:'{t}: got him! Takes {w} from {o}',oneOuld:'one ould',nOuld:'{n} ouled (jrane)',logOver:'Game over',logLeft:'Cannot be placed: {s}',blocked:'No ould can move with this result',routeIn:'Enter',routeLoop:'Stay',chooseRoute:'Choose: enter the opponent’s line or come back into your inner line',goal:'<b>The goal:</b> cut down the opponent’s ouled until he has none left. Choose your strategy: enter his line to attack, or wait and protect your ouled so you don’t lose them.',routeRule:'Once all 12 are salem, entering the opponent’s line is optional: at the top of his inner line, you choose to go in or to come back into your own inner line.',
+   learnIntro:'Tap the button to see the results one by one: first the winning ones (Sig, Four, Six), then the losing ones (Ishou, Dar tlet).',stepOf:'Example {i} of 5',
+   shape:{1:'The siyag: 3 dark and 1 white',2:'The siyag: 2 white and 2 dark',3:'The siyag: 3 white and 1 dark',4:'The siyag: 4 white',6:'The siyag: 4 dark'},
+   tip:{1:['Sig: 1 point, winning throw','You throw again right away. The sig is the key: it makes an ould salem. Until all 12 ouled are salem, that is all a sig can do.'],
+    2:['Ishou: 2 points, losing throw','Your throw ends here, but the 2 points are not lost: you place them on a salem ould along with what you collected. Ishou ends the throw but still moves you forward.'],
+    3:['Dar tlet: 3 points, losing throw','Your throw ends, then you place the 3 points with what you collected on a salem ould.'],
+    4:['Four: 4 points, winning throw','You throw again and collect. If you have no salem, the four goes into the bottle and waits for a sig.'],
+    6:['Six: 6 points, winning throw','The biggest result. You throw again and collect. If you have no salem, it goes into the bottle.']},
+   seqDone:'Throw over: {s}. Total {n}, but each result is placed on its own on a salem ould, in any order you like.',seqNewTurn:'A new turn that starts with dar tlet and ends at once: you place the 3 and the turn passes.',seqGoing:'Total so far: {n}. Still your turn, throw again.',
+   learnRestart:'Restart the examples',learnNext:'Next example: {r}',learnFirst:'Throw: {r}',
+   rulesHTML:['4 olive-wood siyag: one white face and one dark face.','Sig (3 dark, 1 white) = 1, Ishou (2 and 2) = 2, Dar tlet (3 white, 1 dark) = 3, Four (4 white) = 4, Six (4 dark) = 6.','Sig, Four and Six are winning throws: the team throws again without placing and collects. Ishou and Dar tlet are losing throws: the throw ends and the team places what it collected.','Each result is placed on its own, and the team picks the ould and the order. For example 2 × Sig, Four, Six, Ishou: total 14, but each is played separately.','Each team has 12 ouled. An ould opened with a sig becomes salem, and only salem ouled move with the other results.','Until all 12 ouled are salem, a sig can only open an ould, and salem ouled only circle the two inner lines.','Once all 12 are salem, they enter the opponent’s line from the top and start taking, always circling on the opponent’s side.','Two ouled of the same team cannot share a hole. If the count lands an ould on its brother, it is blocked and another one moves.','The jrane: once all 12 are salem, you may join two salem in one hole. They move together and only split with a sig. If the opponent lands on them, he takes both.','If you land exactly on the opponent’s ouled: got him! You take them and they gather on your side.','The guer3a (glass bottle): if you have no salem, fours and sixes go into the bottle. If a sig comes in the same turn you play them, otherwise they are lost.','The salia: if a stick lands on its edge, it is thrown again. It is rare and random.','The team that eliminates all of the opponent’s ouled wins.'],
+   stepsHTML:['<b>The siyag:</b> 4 olive sticks, one white face and one dark face. Each throw gives one of 5 results.','<b>Winning and losing:</b> Sig, Four and Six are winning: you throw again and collect. Ishou and Dar tlet are losing: the throw ends, but they are placed too.','<b>The ouled:</b> each team has 12 ouled in its line. An ould does not move until it gets a sig; then it becomes salem.','<b>Sellem:</b> until all 12 are salem, a sig only opens ouled, and salem ouled circle the inner lines only.','<b>Attack:</b> once all 12 are salem, they enter the opponent’s line. Land exactly on one of his ouled: got him!','<b>The jrane:</b> two salem in the same hole move together; you need a sig to split them.','<b>The guer3a:</b> with no salem, fours and sixes go into the bottle until a sig comes.','<b>Winning:</b> whoever eliminates all of the opponent’s ouled wins.']}
+  };
+  const VAL={0:6,1:1,2:2,3:3,4:4};
+  const AGAIN=new Set([1,4,6]);
+  const other=t=>t==='A'?'B':'A';
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  const $=id=>document.getElementById(id);
+  
+  /* ---------- language ---------- */
+  let LANG='dar';
+  try{const l=localStorage.getItem('syag-lang');if(I18N[l])LANG=l;}catch(e){}
+  const D=()=>I18N[LANG];
+  function T(k,v){let s=D()[k];if(s==null)s=I18N.dar[k]||k;if(v)for(const x in v)s=s.split('{'+x+'}').join(v[x]);return s;}
+  const NM=v=>D().names[v];
+  let CUSTOM={A:'',B:''};
+  try{const n=JSON.parse(localStorage.getItem('syag-names')||'null');if(n){CUSTOM.A=n.A||'';CUSTOM.B=n.B||'';}}catch(e){}
+  const TN=t=>CUSTOM[t]||T('def'+t);
+  const NUM={2:'جوج',3:'ثلاثة',4:'ربعة',5:'خمسة',6:'ستة',7:'سبعة',8:'تمنية',9:'تسعود',10:'عشرة'};
+  const CNUM={3:'ثلاث',4:'ربع',5:'خمس',6:'ست',7:'سبع',8:'تمن',9:'تسع',10:'عشر'};
+  function countName(v,n){
+    if(n===1)return NM(v);
+    if(LANG!=='dar')return n+' × '+NM(v);
+    if(v===1)return n===2?'سيگين':(CNUM[n]||n)+' سياگ';
+    if(v===3)return (NUM[n]||n)+' ديال دار ثلاث';
+    if(v===4)return n===2?'أربعتين':(CNUM[n]||n)+' أربعات';
+    if(v===6)return n===2?'جوج ستات':(NUM[n]||n)+' ستات';
+    if(n===2)return 'جوج إيشوات';
+    return (NUM[n]||n)+' إيشوات';
+  }
+  function counted(list){const c={};list.forEach(v=>c[v]=(c[v]||0)+1);return [1,4,6,2,3].filter(v=>c[v]).map(v=>[v,c[v]]);}
+  const summary=list=>counted(list).map(([v,n])=>countName(v,n)).join(LANG==='fr'||LANG==='en'?', ':'، ');
+  function spokenSummary(list){
+    if(LANG==='dar')return summary(list).replace(/سيگين/g,'سيكين').replace(/سياگ/g,'سياك').replace(/سيگ/g,'سيك');
+    return counted(list).map(([v,n])=>(n>1?n+' ':'')+D().speak[v]).join(', ');
+  }
+  function applyLang(){
+    const d=D();const app=$('app');app.dir=d.dir;document.documentElement.lang=LANG==='dar'?'ar-MA':LANG;
+    document.querySelectorAll('[data-t]').forEach(el=>{el.textContent=T(el.dataset.t);});
+    $('zoomIn').setAttribute('aria-label',T('zoomIn'));$('zoomOut').setAttribute('aria-label',T('zoomOut'));
+    $('rulesList').innerHTML=[d.goal].concat(d.rulesHTML.slice(0,7),[d.routeRule],d.rulesHTML.slice(7)).map(s=>'<li>'+s+'</li>').join('');
+    $('stepsList').innerHTML=[d.goal].concat(d.stepsHTML).map(s=>'<li>'+s+'</li>').join('');
+    ['A','B'].forEach(t=>{$('name'+t).placeholder=T('def'+t);});
+    $('lang').value=LANG;pickVoice();paintSound();paintTheme();legend();
+    if(S)render();renderLearn();
+  }
+  
+  /* ---------- theme ---------- */
+  function isDark(){const a=document.documentElement.getAttribute('data-theme');if(a)return a==='dark';try{return matchMedia('(prefers-color-scheme: dark)').matches}catch(e){return false}}
+  function paintTheme(){const d=isDark();$('themeBtn').setAttribute('aria-pressed',String(d));$('themeTxt').textContent=d?T('themeDark'):T('themeLight');}
+  try{const th=localStorage.getItem('sig-theme');if(th)document.documentElement.setAttribute('data-theme',th);}catch(e){}
+  $('themeBtn').addEventListener('click',()=>{const n=isDark()?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('sig-theme',n)}catch(e){}paintTheme();});
+  
+  /* ---------- sticks ---------- */
+  function mkShape(i){let s=i*977+131;const r=()=>{s=(s*9301+49297)%233280;return s/233280;};
+    const L=[],R=[];for(let k=0;k<=11;k++){const y=4+k*19.3;const b=Math.sin(k/11*Math.PI)*1.5;L.push([5-b+(r()-.5)*1.6,y]);R.push([31+b+(r()-.5)*1.6,y]);}
+    const ct=(r()-.5)*6,cb=(r()-.5)*6;L[0][1]+=ct;R[0][1]-=ct;L[11][1]+=cb;R[11][1]-=cb;
+    const pts=L.concat(R.slice().reverse()).map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+    return {pts,knots:[0,1,2].map(()=>({x:11+r()*14,y:30+r()*160,s:1.3+r()*2})),dots:Array.from({length:16},()=>({x:8+r()*20,y:12+r()*196})),tilt:(r()-.5)*5};}
+  const SHAPES=[0,1,2,3].map(mkShape);
+  let svgSeq=0;
+  function stickSVG(face,i){
+    const sh=SHAPES[i],id='s'+(svgSeq++)+face;
+    if(face==='edge')return '<svg viewBox="0 0 12 220" preserveAspectRatio="none"><defs><clipPath id="c'+id+'"><rect x="1" y="3" width="10" height="214" rx="4"/></clipPath></defs><g clip-path="url(#c'+id+')"><rect width="6" height="220" fill="#E9DDBF"/><rect x="6" width="6" height="220" fill="#3F5C2E"/></g></svg>';
+    const white=face!=='k';
+    let h='<svg viewBox="0 0 36 220" preserveAspectRatio="none" style="transform:rotate('+sh.tilt.toFixed(1)+'deg)"><defs><linearGradient id="g'+id+'" x1="0" x2="1">'+(white?
+      '<stop offset="0" stop-color="#C4AE80"/><stop offset=".45" stop-color="#F3EAD2"/><stop offset=".7" stop-color="#E4D5B0"/><stop offset="1" stop-color="#B89F70"/>':
+      '<stop offset="0" stop-color="#22341A"/><stop offset=".38" stop-color="#5A7A40"/><stop offset=".62" stop-color="#4A6634"/><stop offset="1" stop-color="#1C2C15"/>')+
+      '</linearGradient><filter id="f'+id+'" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="'+(white?'0.9 0.012':'0.22 0.05')+'" numOctaves="2" seed="'+(i+3)+'"/><feColorMatrix values="'+(white?'0 0 0 0 .45 0 0 0 0 .31 0 0 0 0 .15 0 0 0 1.1 -.38':'0 0 0 0 .07 0 0 0 0 .11 0 0 0 0 .04 0 0 0 1.4 -.45')+'"/></filter><clipPath id="c'+id+'"><polygon points="'+sh.pts+'"/></clipPath></defs>'+
+      '<polygon points="'+sh.pts+'" fill="url(#g'+id+')"/><g clip-path="url(#c'+id+')"><rect width="36" height="220" filter="url(#f'+id+')"/>';
+    if(white){sh.knots.forEach(k=>h+='<ellipse cx="'+k.x.toFixed(1)+'" cy="'+k.y.toFixed(1)+'" rx="'+k.s.toFixed(1)+'" ry="'+(k.s*1.8).toFixed(1)+'" fill="#A07D4A" opacity=".75"/><ellipse cx="'+k.x.toFixed(1)+'" cy="'+k.y.toFixed(1)+'" rx="'+(k.s*.45).toFixed(1)+'" ry="'+(k.s*.8).toFixed(1)+'" fill="#5E4426"/>');h+='<rect x="15" y="6" width="2.5" height="208" fill="#fff" opacity=".22"/>';}
+    else{sh.dots.forEach(d=>h+='<ellipse cx="'+d.x.toFixed(1)+'" cy="'+d.y.toFixed(1)+'" rx=".5" ry="1.1" fill="#B5C58F" opacity=".7"/>');sh.knots.forEach(k=>h+='<ellipse cx="'+k.x.toFixed(1)+'" cy="'+k.y.toFixed(1)+'" rx="'+(k.s*1.2).toFixed(1)+'" ry="'+(k.s*1.6).toFixed(1)+'" fill="#1A2812" stroke="#7E9658" stroke-width=".6"/>');h+='<rect x="13" y="6" width="2" height="208" fill="#D8E6B0" opacity=".14"/>';}
+    return h+'</g><polygon points="'+sh.pts+'" fill="none" stroke="rgba(0,0,0,.3)" stroke-width=".6"/></svg>';
+  }
+  const bundle=i=>({x:(i-1.5)*6,y:0,r:(i-1.5)*3});
+  const tf=(o,ry)=>'translate('+o.x.toFixed(1)+'px,'+o.y.toFixed(1)+'px) rotate('+o.r.toFixed(1)+'deg) rotateY('+ry+'deg)';
+  const HAND=['w','k','w','k'];
+  function drawSticks(box,st,layout){box.innerHTML=(st||HAND).map((s,i)=>{const f=st?s:HAND[i];return '<div class="stick '+f+'" style="transform:'+tf(layout&&st?layout[i]:bundle(i),0)+'">'+stickSVG(f,i)+'</div>';}).join('');}
+  function makeLayout(box){
+    const half=Math.max(60,box.clientWidth/2-14),hh=box.clientHeight;
+    const slots=[-.78,-.26,.26,.78].sort(()=>Math.random()-.5);
+    return slots.map(f=>({x:f*half+(Math.random()-.5)*half*.16,y:(Math.random()-.5)*hh*.14,r:(Math.random()-.5)*36}));
+  }
+  function randomSticks(){return [0,1,2,3].map(()=>Math.random()<0.012?'edge':(Math.random()<0.5?'w':'k'));}
+  function throwAnim(box,st,layout){return new Promise(res=>{
+    const els=[...box.children];const H=box.clientHeight;
+    if(FX()&&audio())rattle();
+    let reduce=false;try{reduce=matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}
+    if(reduce||!els.length||!els[0].animate){els.forEach((el,i)=>{el.className='stick '+st[i];el.innerHTML=stickSVG(st[i],i);el.style.transform=tf(layout[i],0);woodHit(0.15+i*0.07,0.8);});setTimeout(res,500);return;}
+    let done=0;
+    els.forEach((el,i)=>{
+      const a=bundle(i),b=layout[i],d=1150+Math.random()*300,delay=120+i*60;
+      const mid={x:b.x*0.55,y:-H*0.3+b.y*0.3,r:b.r*0.5},hop={x:b.x,y:b.y-H*0.05,r:b.r*0.95};
+      const an=el.animate([{transform:tf(a,0)},{transform:tf({x:a.x,y:a.y+5,r:a.r},0),offset:0.08},{transform:tf(mid,90),offset:0.42},{transform:tf(b,180),offset:0.72},{transform:tf(hop,180),offset:0.84},{transform:tf(b,180)}],{duration:d,delay,easing:'cubic-bezier(.35,.55,.45,1)',fill:'forwards'});
+      woodHit((delay+d*0.72)/1000,0.95);woodHit((delay+d*0.86)/1000,0.32);woodHit((delay+d)/1000,0.12);
+      setTimeout(()=>{el.className='stick '+st[i];el.innerHTML=stickSVG(st[i],i);},delay+d*0.42);
+      an.onfinish=()=>{if(++done===els.length)res();};
+    });
+    setTimeout(res,2400);
+  });}
+  async function resolveSalia(st,onShow){
+    if(!st.includes('edge'))return st;
+    onShow(true);say(T('saliaSay'),'neutral');await sleep(1100);woodHit(0,0.8);
+    const out=st.map(s=>s==='edge'?(Math.random()<0.5?'w':'k'):s);onShow(false);return out;
+  }
+  
+  /* ---------- sound & voice ---------- */
+  let soundOn=true,fxOn=true,voiceOn=true,AC=null,VOICE=null,maleVoice=false;
+  try{soundOn=localStorage.getItem('sig-sound')!=='0';fxOn=localStorage.getItem('syag-fx')!=='0';voiceOn=localStorage.getItem('syag-voice')!=='0';}catch(e){}
+  const FX=()=>soundOn&&fxOn;
+  function audio(){try{if(!AC){const C=window.AudioContext||window.webkitAudioContext;try{AC=new C({latencyHint:'interactive'})}catch(e){AC=new C()}}if(AC.state!=='running')AC.resume();if(!AC._unlocked){const b=AC.createBuffer(1,1,22050);const s=AC.createBufferSource();s.buffer=b;s.connect(AC.destination);s.start(0);AC._unlocked=true;}}catch(e){AC=null}return AC;}
+  ['pointerdown','touchstart','touchend','click','keydown'].forEach(ev=>document.addEventListener(ev,()=>{if(soundOn)audio();},{passive:true,capture:true}));
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&AC&&AC.state!=='running')try{AC.resume()}catch(e){}});
+  function woodHit(at,g){
+    const ac=AC;if(!ac||!FX())return;const t=ac.currentTime+Math.max(0,at);
+    const len=Math.floor(ac.sampleRate*0.05);const buf=ac.createBuffer(1,len,ac.sampleRate);const d=buf.getChannelData(0);
+    for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,5);
+    const s=ac.createBufferSource();s.buffer=buf;const bp=ac.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1700+Math.random()*1500;bp.Q.value=2.2;
+    const gn=ac.createGain();gn.gain.value=g*0.8;s.connect(bp).connect(gn).connect(ac.destination);s.start(t);
+    [1,2.7].forEach((m,j)=>{const o=ac.createOscillator();o.type='sine';const f=(430+Math.random()*170)*m;o.frequency.setValueAtTime(f,t);o.frequency.exponentialRampToValueAtTime(f*0.86,t+0.09);
+      const og=ac.createGain();og.gain.setValueAtTime(g*(j?0.16:0.42),t);og.gain.exponentialRampToValueAtTime(0.001,t+(j?0.05:0.12));o.connect(og).connect(ac.destination);o.start(t);o.stop(t+0.14);});
+    const th=ac.createOscillator();th.type='sine';th.frequency.setValueAtTime(150,t);th.frequency.exponentialRampToValueAtTime(70,t+0.08);
+    const tg=ac.createGain();tg.gain.setValueAtTime(g*0.32,t);tg.gain.exponentialRampToValueAtTime(0.001,t+0.1);th.connect(tg).connect(ac.destination);th.start(t);th.stop(t+0.12);
+  }
+  function rattle(){for(let i=0;i<8;i++)woodHit(i*0.016+Math.random()*0.01,0.1+Math.random()*0.08);}
+  function tone(f,at,dur,g,type,f2){const ac=AC;if(!ac||!FX())return;const t=ac.currentTime+at;const o=ac.createOscillator();o.type=type||'sine';o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);const gg=ac.createGain();gg.gain.setValueAtTime(0.001,t);gg.gain.exponentialRampToValueAtTime(g,t+0.015);gg.gain.exponentialRampToValueAtTime(0.001,t+dur);o.connect(gg).connect(ac.destination);o.start(t);o.stop(t+dur+0.02);}
+  function clap(at,g){const ac=AC;if(!ac||!FX())return;const t=ac.currentTime+at;const len=Math.floor(ac.sampleRate*0.04);const b=ac.createBuffer(1,len,ac.sampleRate);const d=b.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,6);const s=ac.createBufferSource();s.buffer=b;const f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=900+Math.random()*1600;f.Q.value=0.9;const gg=ac.createGain();gg.gain.value=g;s.connect(f).connect(gg).connect(ac.destination);s.start(t);}
+  function applause(len){if(!FX()||!audio())return;len=len||2.7;for(let i=0;i<len*62;i++){const x=Math.random()*len;const env=x<0.3?x/0.3:x>len-0.8?Math.max(0,1-(x-(len-0.8))/0.8):1;if(env>0)clap(x,0.4*env*(0.5+Math.random()*0.5));}}
+  function zaghrouta(at){const ac=AC;if(!ac||!FX())return;const t=ac.currentTime+at;const o=ac.createOscillator();o.type='triangle';o.frequency.value=1150;const l=ac.createOscillator();l.frequency.value=11;const lg=ac.createGain();lg.gain.value=150;l.connect(lg).connect(o.frequency);const g=ac.createGain();g.gain.setValueAtTime(0.001,t);g.gain.exponentialRampToValueAtTime(0.16,t+0.15);g.gain.setValueAtTime(0.16,t+1.9);g.gain.exponentialRampToValueAtTime(0.001,t+2.3);o.connect(g).connect(ac.destination);o.start(t);l.start(t);o.stop(t+2.35);l.stop(t+2.35);}
+  function winJingle(){if(!audio())return;tone(660,0,0.13,0.22,'triangle');tone(880,0.11,0.2,0.24,'triangle');tone(1320,0.22,0.28,0.12,'sine');}
+  function loseJingle(){if(!audio())return;tone(392,0,0.28,0.2,'sine',360);tone(311,0.26,0.5,0.2,'sine',247);}
+  function salemSound(){if(!audio())return;[784,988,1319].forEach((f,i)=>tone(f,i*0.09,0.55,0.2,'sine'));for(let i=0;i<26;i++){const x=0.15+Math.random()*0.6;clap(x,0.2*(1-(x-0.15)/0.6));}}
+  function captureSound(n){
+    if(!FX()||!audio())return;
+    woodHit(0,1);woodHit(0.07,0.8);
+    (n>1?[523,659,784,1047]:[523,659,784]).forEach((f,i)=>tone(f,0.15+i*0.11,0.28,0.3,'triangle'));
+    for(let i=0;i<40;i++){const x=0.45+Math.random()*0.8;clap(x,0.22*(1-(x-0.45)/0.8));}
+  }
+  const MALE=/maged|majed|tarik|tariq|hamed|naayf|shakir|hamdan|fahed|omar|rachid|hassan|ahmed|adam|thomas|daniel|alex|fred|aaron|arthur|nicolas|paul|henri|male|homme|man\b/i;
+  function pickVoice(){try{const want=D().voice;const all=speechSynthesis.getVoices();
+    let vs=all.filter(v=>v.lang.toLowerCase().startsWith(want.toLowerCase().slice(0,2)));
+    if(want==='ar-MA'){const ma=vs.filter(v=>/MA/i.test(v.lang));if(ma.length)vs=ma.concat(vs.filter(v=>!/MA/i.test(v.lang)));}
+    VOICE=vs.find(v=>MALE.test(v.name))||vs[0]||null;maleVoice=!!(VOICE&&MALE.test(VOICE.name));}catch(e){}}
+  try{speechSynthesis.onvoiceschanged=pickVoice;}catch(e){}
+  function say(txt,mood){
+    if(!soundOn||!voiceOn)return;
+    const P={win:[1.1,0.8,1.0],lose:[0.7,0.45,0.78],dare:[1.25,0.95,1.15],neutral:[0.9,0.55,0.9]}[mood||'neutral'];
+    try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang=VOICE?VOICE.lang:D().voice;if(VOICE)u.voice=VOICE;u.pitch=maleVoice?P[0]:P[1];u.rate=P[2];speechSynthesis.speak(u);}catch(e){}
+  }
+  function announce(v){const w=AGAIN.has(v);const sp=D().speak[v];if(w){winJingle();say(sp+'!','win');}else{loseJingle();setTimeout(()=>say(sp+'...','lose'),250);}}
+  function paintSound(){$('soundBtn').setAttribute('aria-pressed',String(soundOn));$('soundTxt').textContent=soundOn?T('soundOn'):T('soundOff');}
+  $('soundBtn').addEventListener('click',()=>{soundOn=!soundOn;try{localStorage.setItem('sig-sound',soundOn?'1':'0')}catch(e){}if(soundOn)audio();else try{speechSynthesis.cancel()}catch(e){}paintSound();});
+  
+  function cheer(msg,big){
+    const box=document.createElement('div');box.className='cheer';
+    const cols=['var(--fruit)','var(--pad)','var(--wood)','var(--date-hi)','var(--kahla)'];
+    let h='<div class="msg"></div>';
+    for(let i=0;i<(big?80:46);i++)h+='<i style="left:'+(Math.random()*100).toFixed(1)+'%;background:'+cols[i%5]+';animation-delay:'+(Math.random()*(big?1.4:0.8)).toFixed(2)+'s;animation-duration:'+(2+Math.random()*0.9).toFixed(2)+'s"></i>';
+    box.innerHTML=h;box.firstChild.textContent=msg;document.body.appendChild(box);setTimeout(()=>box.remove(),big?3800:3200);
+  }
+  
+  /* ---------- game state ---------- */
+  let S=null;
+  function fresh(mode,players){
+    const pions=[];let id=0;
+    for(const t of ['A','B'])for(let i=0;i<12;i++)pions.push({id:id++,team:t,i,home:true,pos:t==='A'?11-i:i,alive:true});
+    return {mode,players,turn:'A',ptr:{A:0,B:0},pions,phase:'throw',sticks:null,layout:null,val:null,salia:false,pool:[],qura:[],quraFx:null,sel:-1,sellem:{A:false,B:false},full:{A:false,B:false},movingIds:[],hit:null,log:[['logStart',{t:'@A'}]],winner:null};
+  }
+  function pathCell(t,x){
+    const seg=(t==='A'?[[3,1],[2,0],[1,1],[0,0]]:[[0,0],[1,1],[2,0],[3,1]])[Math.floor(x/12)];
+    const k=x%12;return[seg[0],seg[1]?11-k:k];
+  }
+  const cellOf=p=>pathCell(p.team,p.pos);
+  const key=c=>c[0]+'-'+c[1];
+  const alive=t=>S.pions.filter(p=>p.alive&&p.team===t);
+  const active=t=>alive(t).filter(p=>!p.home);
+  const inactive=t=>alive(t).filter(p=>p.home);
+  const allSalem=t=>inactive(t).length===0;
+  const isAI=()=>S.mode==='ai'&&S.turn==='B';
+  const step=(t,pos,route)=>pos===35?(allSalem(t)&&route==='in'?36:12):pos===47?24:pos+1;
+  function adv(t,pos,v,route){for(let k=0;k<v;k++)pos=step(t,pos,route);return pos;}
+  function ownAt(t,pos,excl){const k=key(pathCell(t,pos));return active(t).filter(p=>!excl.includes(p.id)&&key(cellOf(p))===k).length;}
+  function movesFor(t,v){
+    const out=[];const cap=allSalem(t)?2:1;
+    if(v===1&&!allSalem(t)){
+      const h=inactive(t);const f=h.reduce((a,b)=>b.pos>a.pos?b:a);const to=f.pos+1;
+      if(ownAt(t,to,[])<cap&&!victimsAt(t,to).length)out.push({pids:[f.id],to,exit:true});
+      return out;
+    }
+    const groups={};active(t).forEach(p=>{const k=key(cellOf(p));(groups[k]=groups[k]||[]).push(p);});
+    Object.values(groups).forEach(g=>{
+      const ps=v===1?[g[0]]:g;const ids=ps.map(p=>p.id);
+      const a=adv(t,ps[0].pos,v,'in'),b=adv(t,ps[0].pos,v,'loop');
+      const opts=a===b?[[a,null]]:[[a,'in'],[b,'loop']];
+      opts.forEach(([to,route])=>{if(ownAt(t,to,ids)+ps.length<=cap)out.push({pids:ids,to,route,exit:false,split:v===1&&g.length>1});});
+    });
+    return out;
+  }
+  const usable=(t,v)=>movesFor(t,v).length>0;
+  function victimsAt(t,to){const k=key(pathCell(t,to));return alive(other(t)).filter(p=>key(cellOf(p))===k);}
+  /* log entries are stored as [key, vars]; '@A' / '@B' = team name, '#r:v' = result name, '#s:..' = summary */
+  function addLog(k,v){S.log.unshift([k,v||{}]);S.log=S.log.slice(0,5);}
+  function fmt(v){const o={};for(const x in v){const s=v[x];o[x]=typeof s==='string'&&s[0]==='@'?TN(s.slice(1)):typeof s==='string'&&s.startsWith('#r:')?NM(+s.slice(3)):typeof s==='string'&&s.startsWith('#s:')?summary(s.slice(3).split(',').map(Number)):typeof s==='string'&&s.startsWith('#k:')?T(s.slice(3),fmt(v._k||{})):s;}return o;}
+  function logText(e){if(!Array.isArray(e))return String(e);const v=e[1]||{};return T(e[0],fmt(v))+(v.suffix?T(v.suffix):'');}
+  
+  /* ---------- render ---------- */
+  let resumePending=false;
+  function render(){
+    if(!S)return;
+    const t=S.turn,ai=isAI();
+    $('turnToken').innerHTML='<span class="pc '+t+'" style="position:relative"></span>';
+    $('turnName').textContent=T('turnOf',{n:TN(t)});
+    $('turnPlayer').textContent=ai?T('phonePlays'):(S.players>1?T('playerN',{i:S.ptr[t]+1,n:S.players}):'');
+    const cnt=x=>T('counts',{a:alive(x).length,s:active(x).length});
+    $('counts').innerHTML='';['A','B'].forEach((x,i)=>{if(i)$('counts').appendChild(document.createElement('br'));$('counts').appendChild(document.createTextNode(TN(x)+': '+cnt(x)));});
+    $('colA').textContent=TN('A');$('colB').textContent=TN('B');
+    ['A','B'].forEach(x=>{const o=other(x);const d=S.pions.filter(p=>p.team===o&&!p.alive);const box=$('dead'+x);box.setAttribute('aria-label',T('ate',{t:TN(x),n:d.length}));box.innerHTML='<span class="n"></span>'+d.map(()=>'<span class="pc '+o+'"></span>').join('');box.firstChild.textContent=T('ate',{t:TN(x),n:d.length});});
+    drawSticks($('sticks'),S.sticks,S.layout);
+  
+    let r;
+    if(S.salia)r='<div class="name salia">'+T('salia')+'</div><div class="meta">'+T('saliaMeta')+'</div>';
+    else if(S.val){
+      const meta=S.phase==='throw'&&S.qura.length?'<b>'+T('metaQura')+'</b>':S.phase==='throw'&&S.pool.length?'<b>'+T('metaWin')+'</b>':S.phase==='place'?T('metaPlace'):'';
+      r='<div class="name">'+NM(S.val)+'</div><div class="meta">'+meta+'</div>';
+    } else r='<div class="meta">'+T('startHint')+'</div>';
+    $('result').innerHTML=r;
+  
+    const q=$('qura');q.hidden=!(S.qura.length||S.quraFx);q.className='qura'+(S.quraFx?' '+S.quraFx:'');
+    $('quraItems').innerHTML=S.qura.map(v=>'<span>'+NM(v)+' '+v+'</span>').join('');
+    $('quraLabel').textContent=S.quraFx==='lost'?T('quraLost'):T('qura');
+  
+    const placing=S.phase==='place';
+    $('play').classList.toggle('focus',placing&&autoFocus);
+    $('pool').innerHTML=S.pool.length?S.pool.map((v,i)=>{
+      const ok=placing&&usable(t,v);
+      return '<button type="button" class="pchip'+(placing&&i===S.sel?' sel':'')+(placing?'':' idle')+'" data-i="'+i+'"'+(placing&&!ok?' disabled':'')+(placing?'':' tabindex="-1"')+'>'+NM(v)+' <b>'+v+'</b></button>';
+    }).join(''):(S.qura.length?'':'<span class="hint">'+T('poolHint')+'</span>');
+    $('total').textContent=S.pool.length>1?summary(S.pool)+' · '+T('total')+': '+S.pool.reduce((a,b)=>a+b,0):'';
+  
+    const tb=$('throwBtn');
+    tb.disabled=S.phase!=='throw'||S.busy||ai||!!S.winner;
+    tb.textContent=placing?(ai?T('aiPlacing'):T('pickResult')):(S.pool.length||S.qura.length?T('throwAgain'):T('throw'));
+  
+    const src=new Set(),dst=new Set();
+    const tags={};let from=null;
+    if(placing&&!ai&&!S.busy&&S.choose){from=key(cellOf(S.pions[S.choose[0].pids[0]]));S.choose.forEach(m=>{const k=key(pathCell(t,m.to));src.add(k);dst.add(k);tags[k]=m.route==='in'?T('routeIn'):T('routeLoop');});$('total').textContent=T('chooseRoute');}
+    else if(placing&&!ai&&!S.busy&&S.sel>=0&&S.pool[S.sel]!=null){movesFor(t,S.pool[S.sel]).forEach(m=>{src.add(key(cellOf(S.pions[m.pids[0]])));dst.add(key(pathCell(t,m.to)));});}
+    const byCell={};S.pions.forEach(p=>{if(!p.alive)return;const k=key(cellOf(p));(byCell[k]=byCell[k]||[]).push(p);});
+    let h='';
+    for(let row=0;row<12;row++)for(let col=0;col<4;col++){
+      const k=col+'-'+row,ps=byCell[k]||[],gc=col<2?col+1:col+2,can=src.has(k);
+      let inner='';ps.slice(0,2).forEach((p,i)=>inner+='<span class="pc '+p.team+(i?' second':'')+(S.movingIds.includes(p.id)||k===from?' lift':'')+'"></span>');
+      if(tags[k])inner+='<span class="rtag">'+tags[k]+'</span>';
+      if(ps.length>1)inner+='<span class="badge">'+ps.length+'</span>';
+      if(S.hit&&S.hit.k===k)inner+='<span class="hit">'+T('hit')+(S.hit.n>1?' ('+S.hit.n+')':'')+'</span>';
+      const label=ps.length?T('cellPieces',{n:ps.length,t:TN(ps[0].team)}):T('cellEmpty');
+      h+='<button type="button" class="cell'+(can?' can':'')+(dst.has(k)?' dest':'')+'" style="grid-column:'+gc+';grid-row:'+(row+1)+'" data-k="'+k+'"'+(can?'':' tabindex="-1"')+' aria-label="'+label.replace(/"/g,'&quot;')+'">'+inner+'</button>';
+    }
+    $('board').innerHTML=h;
+    const lg=$('log');lg.innerHTML='';S.log.forEach(e=>{const li=document.createElement('li');if(Array.isArray(e)&&e[0]==='logKill')li.className='cap';li.textContent=logText(e);lg.appendChild(li);});
+    $('winBox').innerHTML=S.winner?'<div class="win-banner"></div>':'';if(S.winner)$('winBox').firstChild.textContent=T('win',{t:TN(S.winner)});
+    if(!S.busy&&!resumePending){try{if(S.winner)localStorage.removeItem('syag-save');else localStorage.setItem('syag-save',JSON.stringify(S));}catch(e){}}
+  }
+  function legend(){
+    const pat={1:'kkkw',2:'kkww',3:'kwww',4:'wwww',6:'kkkk'};
+    $('legend').innerHTML=[1,2,3,4,6].map(v=>'<span class="chip'+(AGAIN.has(v)?' win':'')+'"><span class="mini">'+pat[v].split('').map(c=>'<i class="'+c+'"></i>').join('')+'</span>'+NM(v)+' '+v+'</span>').join('');
+  }
+  function flyToCaptor(vic,t,k){
+    let reduce=false;try{reduce=matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}
+    const cell=document.querySelector('.cell[data-k="'+k+'"]'),box=$('dead'+t);
+    if(reduce||!cell||!box||!document.body.animate)return Promise.resolve();
+    const a=cell.getBoundingClientRect(),b=box.getBoundingClientRect();
+    return Promise.all(vic.map((v,i)=>{
+      const el=document.createElement('span');el.className='pc '+v.team+' fly';
+      el.style.left=(a.left+a.width/2-6)+'px';el.style.top=(a.top+a.height/2-10)+'px';document.body.appendChild(el);
+      const dx=b.left+b.width/2-(a.left+a.width/2)+(i*10),dy=b.top+b.height/2-(a.top+a.height/2);
+      const an=el.animate([{transform:'translate(0,0) scale(1.4)'},{transform:'translate('+dx*0.5+'px,'+(dy*0.5-60)+'px) scale(1.6) rotate(200deg)',offset:0.5},{transform:'translate('+dx+'px,'+dy+'px) scale(.9) rotate(360deg)'}],{duration:800,delay:i*120,easing:'cubic-bezier(.4,.2,.3,1)',fill:'forwards'});
+      return an.finished.then(()=>el.remove()).catch(()=>el.remove());
+    }));
+  }
+  
+  /* ---------- turn flow ---------- */
+  async function doThrow(){
+    if(!S||S.phase!=='throw'||S.busy||S.winner)return;
+    S.busy=true;S.salia=false;S.val=null;
+    let st=randomSticks();
+    S.sticks=null;S.layout=null;render();
+    S.layout=makeLayout($('sticks'));
+    await throwAnim($('sticks'),st,S.layout);
+    S.sticks=st.slice();render();
+    if(st.includes('edge')){st=await resolveSalia(st,on=>{S.salia=on;if(!on)S.sticks=null;render();});S.sticks=st;addLog('logSalia');render();}
+    const v=VAL[st.filter(s=>s==='w').length];const t=S.turn;const win=AGAIN.has(v);
+    S.val=v;announce(v);addLog('logGot',{t:'@'+t,r:'#r:'+v});
+    const locked=active(t).length===0&&!S.pool.includes(1);
+    if(locked&&v!==1){
+      if(win){S.qura.push(v);addLog('logToQura',{r:'#r:'+v});S.busy=false;render();if(isAI())setTimeout(doThrow,1200);return;}
+      render();await sleep(900);
+      if(S.qura.length){S.quraFx='lost';addLog('logQuraLost');render();await sleep(1400);}
+      else addLog('logNoSalem',{t:'@'+t});
+      S.qura=[];S.quraFx=null;render();await sleep(500);S.busy=false;passTurn();return;
+    }
+    if(v===1&&S.qura.length){render();await sleep(500);S.quraFx='pour';render();await sleep(950);S.pool=S.qura.concat(S.pool);S.qura=[];S.quraFx=null;addLog('logQuraOut');}
+    S.pool.push(v);
+    if(win){S.busy=false;render();if(isAI())setTimeout(doThrow,1100);return;}
+    S.phase='place';S.sel=-1;render();await sleep(900);S.busy=false;
+    startPlace();
+  }
+  function startPlace(){
+    const t=S.turn;
+    S.phase='place';S.sel=S.pool.findIndex(v=>usable(t,v));
+    if(S.pool.length>1){addLog('logCollected',{t:'@'+t,s:'#s:'+S.pool.join(',')});const sp=spokenSummary(S.pool);setTimeout(()=>say(sp,'neutral'),900);}
+    if(S.sel<0){addLog('logNone');S.pool=[];render();setTimeout(passTurn,1200);return;}
+    render();
+    if(isAI())setTimeout(aiPlace,900);else autoIfSingle();
+  }
+  function autoIfSingle(){
+    if(S.pool.length!==1)return;
+    const ms=movesFor(S.turn,S.pool[0]);
+    if(ms.length===1)setTimeout(()=>applyMove(ms[0],0),700);
+  }
+  async function applyMove(m,idx){
+    if(!m||S.phase!=='place'||S.busy||S.pool[idx]==null)return;
+    S.busy=true;
+    const t=S.turn,v=S.pool[idx],ps=m.pids.map(id=>S.pions[id]);
+    const canEat=!m.exit;
+    S.pool.splice(idx,1);S.sel=-1;S.val=v;
+    say(D().speak[v],AGAIN.has(v)?'win':'neutral');
+    S.movingIds=m.pids.slice();render();await sleep(500);
+    if(m.exit){
+      const p=ps[0];p.home=false;p.pos=m.to;woodHit(0,0.4);render();await sleep(450);
+      if(!S.sellem[t]){S.sellem[t]=true;addLog('logFirstSalem',{t:'@'+t});applause();cheer(T('cheerFirst',{t:TN(t)}));await sleep(2600);}
+      else{salemSound();addLog('logSalem',{t:'@'+t,n:12-inactive(t).length});await sleep(700);}
+      if(allSalem(t)&&!S.full[t]){S.full[t]=true;addLog('logAllSalem',{t:'@'+t});applause(3.2);zaghrouta(0.3);cheer(T('logAllSalem',{t:TN(t)}),true);await sleep(3300);}
+    } else {
+      for(let k=0;k<v;k++){ps.forEach(p=>p.pos=step(t,p.pos,m.route));woodHit(0,0.22);render();await sleep(380);}
+      await sleep(200);
+      const lv={t:'@'+t,r:'#r:'+v};if(ps.length>1)lv.suffix='withJran';else if(m.split)lv.suffix='splitJran';
+      addLog('logPlaced',lv);
+    }
+    S.movingIds=[];
+    const to=ps[0].pos;
+    if(!m.exit&&ownAt(t,to,[])===2&&!m.split&&ps.length===1)addLog('logJran',{t:'@'+t});
+    const vic=canEat?victimsAt(t,to):[];
+    if(vic.length){
+      captureSound(vic.length);setTimeout(()=>say(T('hitSay'),'dare'),200);
+      {const box=document.createElement('div');box.className='cheer';box.innerHTML='<div class="msg hitmsg"></div>';box.firstChild.textContent=T('hit');document.body.appendChild(box);setTimeout(()=>box.remove(),1900);}
+      const hk=key(pathCell(t,to));S.hit={k:hk,n:vic.length};
+      addLog('logKill',{t:'@'+t,o:'@'+other(t),w:vic.length>1?T('nOuld',{n:vic.length}):T('oneOuld')});
+      render();await sleep(700);
+      vic.forEach(x=>x.alive=false);const fly=flyToCaptor(vic,t,hk);render();await fly;await sleep(500);S.hit=null;
+    }
+    S.busy=false;
+    if(alive(other(t)).length===0){S.winner=t;S.phase='over';S.pool=[];addLog('logOver');render();applause(3.5);zaghrouta(0.2);cheer(T('win',{t:TN(t)}),true);return;}
+    const ni=S.pool.findIndex(x=>usable(t,x));
+    if(ni<0){if(S.pool.length)addLog('logLeft',{s:'#s:'+S.pool.join(',')});S.pool=[];render();await sleep(800);passTurn();return;}
+    S.sel=ni;render();
+    if(isAI())setTimeout(aiPlace,700);else autoIfSingle();
+  }
+  function aiPlace(){
+    if(S.phase!=='place'||S.busy)return;
+    const t=S.turn;let best=null,bs=-1e9;
+    S.pool.forEach((v,idx)=>movesFor(t,v).forEach(m=>{
+      let s=(!m.exit?victimsAt(t,m.to).length*100:0)+Math.random()*6+(m.route==='in'?(alive(other(t)).length>3?8:-8):0);
+      if(m.exit)s+=60;else s+=m.to*0.2+(m.pids.length>1?-4:0);
+      if(s>bs){bs=s;best={m,idx};}
+    }));
+    if(best){S.sel=best.idx;render();setTimeout(()=>applyMove(best.m,best.idx),500);}
+  }
+  function announceTurn(){
+    const nm=isAI()?T('phone'):(S.players>1?T('playerSay',{t:TN(S.turn),i:S.ptr[S.turn]+1}):TN(S.turn));
+    say(T('turnSay',{n:nm}),'neutral');
+  }
+  function passTurn(){
+    const n=other(S.turn);S.turn=n;S.ptr[n]=(S.ptr[n]+1)%S.players;
+    S.phase='throw';S.pool=[];S.qura=[];S.quraFx=null;S.sel=-1;S.val=null;render();
+    announceTurn();
+    if(isAI())setTimeout(doThrow,2000);
+  }
+  
+  /* ---------- events ---------- */
+  $('board').addEventListener('click',e=>{
+    const c=e.target.closest('.cell');if(!c||!c.classList.contains('can')||S.busy||S.phase!=='place')return;
+    const k=c.dataset.k;
+    if(S.choose){const m=S.choose.find(m=>key(pathCell(S.turn,m.to))===k);S.choose=null;if(m)applyMove(m,S.sel);else render();return;}
+    const ms=movesFor(S.turn,S.pool[S.sel]).filter(m=>key(cellOf(S.pions[m.pids[0]]))===k);
+    if(ms.length>1){S.choose=ms;render();}else if(ms.length)applyMove(ms[0],S.sel);
+  });
+  $('pool').addEventListener('click',e=>{
+    const b=e.target.closest('.pchip');if(!b||b.disabled||S.phase!=='place'||S.busy||isAI())return;S.choose=null;
+    S.sel=+b.dataset.i;render();
+  });
+  $('throwBtn').addEventListener('click',()=>{audio();doThrow();});
+  let zoom=1,autoFocus=true;
+  try{zoom=+localStorage.getItem('sig-zoom')||1;autoFocus=localStorage.getItem('sig-focus')!=='0';}catch(e){}
+  function applyZoom(){zoom=Math.min(1.8,Math.max(0.8,Math.round(zoom*10)/10));$('board').style.setProperty('--z',zoom);$('zoomOut').disabled=zoom<=0.8;$('zoomIn').disabled=zoom>=1.8;try{localStorage.setItem('sig-zoom',zoom)}catch(e){}}
+  $('zoomIn').addEventListener('click',()=>{zoom+=0.2;applyZoom();});
+  $('zoomOut').addEventListener('click',()=>{zoom-=0.2;applyZoom();});
+  $('fxOn').checked=fxOn;$('voiceOn').checked=voiceOn;
+  $('fxOn').addEventListener('change',()=>{fxOn=$('fxOn').checked;try{localStorage.setItem('syag-fx',fxOn?'1':'0')}catch(e){}if(fxOn){audio();woodHit(0,0.6);}});
+  $('voiceOn').addEventListener('change',()=>{voiceOn=$('voiceOn').checked;try{localStorage.setItem('syag-voice',voiceOn?'1':'0')}catch(e){}if(voiceOn)say(D().speak[1]+'!','win');else try{speechSynthesis.cancel()}catch(e){}});
+  $('autoFocus').checked=autoFocus;
+  $('autoFocus').addEventListener('change',()=>{autoFocus=$('autoFocus').checked;try{localStorage.setItem('sig-focus',autoFocus?'1':'0')}catch(e){}render();});
+  applyZoom();
+  function newGame(){S=fresh($('mode').value,+$('players').value);render();announceTurn();}
+  $('newGame').addEventListener('click',()=>{audio();newGame();$('newGame').closest('details').open=false;kick();});
+  $('mode').addEventListener('change',()=>{newGame();kick();});
+  $('players').addEventListener('change',()=>{S.players=+$('players').value;S.ptr={A:0,B:0};render();});
+  ['A','B'].forEach(t=>{const inp=$('name'+t);inp.value=CUSTOM[t];
+    inp.addEventListener('input',()=>{CUSTOM[t]=inp.value.trim();try{localStorage.setItem('syag-names',JSON.stringify(CUSTOM))}catch(e){}render();});});
+  $('lang').addEventListener('change',()=>{LANG=$('lang').value;try{localStorage.setItem('syag-lang',LANG)}catch(e){}applyLang();});
+  
+  /* ---------- learn tab ---------- */
+  const L={sticks:null,layout:null,busy:false,seq:[],salia:false,step:0};
+  const DEMO=[{v:1,f:['k','w','k','k']},{v:4,f:['w','w','w','w']},{v:6,f:['k','k','k','k']},{v:2,f:['w','k','k','w']},{v:3,f:['w','k','w','w']}];
+  function renderLearn(){
+    drawSticks($('lSticks'),L.sticks,L.layout);
+    const d=D(),last=L.seq[L.seq.length-1];
+    const lr=$('lResult');
+    if(last){const tip=d.tip[last];lr.innerHTML='<p class="lstep"></p><div class="name"></div><p class="lshape"></p><p class="lt '+(AGAIN.has(last)?'w':'l')+'"></p><p class="ld"></p>';
+      lr.children[0].textContent=T('stepOf',{i:L.step});lr.children[1].textContent=NM(last);lr.children[2].textContent=d.shape[last];lr.children[3].textContent=tip[0];lr.children[4].textContent=tip[1];}
+    else{lr.innerHTML='<p></p>';lr.firstChild.textContent=T('learnIntro');}
+    const ls=$('lSeq');
+    if(L.seq.length){
+      const done=last&&!AGAIN.has(last),sum=L.seq.reduce((a,b)=>a+b,0);
+      ls.innerHTML='<div class="pool">'+L.seq.map(v=>'<span class="pchip idle">'+NM(v)+' <b>'+v+'</b></span>').join('')+'</div><p class="hint"></p>';
+      ls.lastChild.textContent=done?(L.seq.length>1?T('seqDone',{s:summary(L.seq),n:sum}):T('seqNewTurn')):T('seqGoing',{n:sum});
+    } else ls.innerHTML='';
+    $('lThrow').disabled=L.busy;
+    $('lThrow').textContent=L.step>=DEMO.length?T('learnRestart'):L.step?T('learnNext',{r:NM(DEMO[L.step].v)}):T('learnFirst',{r:NM(DEMO[0].v)});
+  }
+  async function learnThrow(){
+    if(L.busy)return;audio();
+    if(L.step>=DEMO.length){L.step=0;L.seq=[];}
+    const last=L.seq[L.seq.length-1];if(last&&!AGAIN.has(last))L.seq=[];
+    const d=DEMO[L.step];
+    L.busy=true;const st=d.f.slice();L.sticks=null;L.layout=null;renderLearn();
+    L.layout=makeLayout($('lSticks'));await throwAnim($('lSticks'),st,L.layout);L.sticks=st;
+    L.step++;announce(d.v);L.seq.push(d.v);L.busy=false;renderLearn();
+  }
+  $('lThrow').addEventListener('click',learnThrow);
+  function showTab(){const learn=location.hash==='#learn';$('viewPlay').hidden=learn;$('viewLearn').hidden=!learn;$('tabPlay').setAttribute('aria-selected',String(!learn));$('tabLearn').setAttribute('aria-selected',String(learn));if(learn)renderLearn();else render();}
+  $('tabPlay').addEventListener('click',()=>{location.hash='play';});
+  $('tabLearn').addEventListener('click',()=>{location.hash='learn';});
+  window.addEventListener('hashchange',showTab);
+  
+  /* ---------- start ---------- */
+  function normalize(x){x.choose=null;x.busy=false;x.movingIds=[];x.hit=null;x.salia=false;x.quraFx=null;x.full=x.full||{A:false,B:false};x.log=(x.log||[]).filter(Array.isArray);if(x.phase==='place'&&!x.pool.length)x.phase='throw';return x;}
+  function kick(){if(isAI()){if(S.phase==='throw')setTimeout(doThrow,1600);else if(S.phase==='place')setTimeout(aiPlace,900);}}
+  function start(data){
+    const hot=data&&data.pions&&data.qura;
+    let saved=null;
+    if(!hot){try{saved=JSON.parse(localStorage.getItem('syag-save')||'null')}catch(e){}if(!(saved&&saved.pions&&saved.qura&&saved.log&&!saved.winner))saved=null;}
+    resumePending=!!saved;
+    S=hot?normalize(data):fresh($('mode').value,+$('players').value);
+    $('mode').value=S.mode;$('players').value=String(S.players);
+    applyLang();showTab();
+    if(saved){
+      const cnt=x=>saved.pions.filter(p=>p.team===x&&p.alive).length;
+      $('resumeInfo').textContent=T('resumeInfo',{t:TN(saved.turn),a:cnt('A'),A:TN('A'),b:cnt('B'),B:TN('B')});
+      $('resume').hidden=false;
+      $('resumeBtn').onclick=()=>{audio();S=normalize(saved);resumePending=false;$('resume').hidden=true;$('mode').value=S.mode;$('players').value=String(S.players);render();announceTurn();kick();};
+      $('freshBtn').onclick=()=>{audio();resumePending=false;$('resume').hidden=true;newGame();kick();};
+      return;
+    }
+    if(hot)kick();
+  }
+  window.claude?.hot?.snapshot?.(()=>JSON.parse(JSON.stringify(S)));
+  window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
+})();
+
+</script>
+
+<script>
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});}
+</script>
+</body>
+</html>
