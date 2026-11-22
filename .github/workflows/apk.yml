@@ -16,13 +16,13 @@ jobs:
   apk:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 20
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 17
@@ -77,8 +77,23 @@ jobs:
 
       - name: Cle de signature (toujours la meme, pour pouvoir mettre a jour l'appli)
         run: |
-          mkdir -p ~/.android
-          echo "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" | base64 -d > ~/.android/debug.keystore
+          echo "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" | base64 -d > build/android/app/syag.keystore
+          python3 - <<'PY'
+          p = 'build/android/app/build.gradle'
+          s = open(p).read()
+          cfg = """    signingConfigs {
+                  debug {
+                      storeFile file('syag.keystore')
+                      storePassword 'android'
+                      keyAlias 'androiddebugkey'
+                      keyPassword 'android'
+                  }
+              }
+          """
+          s = s.replace('android {\n', 'android {\n' + cfg, 1)
+          open(p, 'w').write(s)
+          PY
+          grep -n -A6 "signingConfigs" build/android/app/build.gradle
 
       - name: Construire l'APK
         working-directory: build/android
@@ -86,6 +101,7 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
           cp app/build/outputs/apk/debug/app-debug.apk ../../SYAG.apk
+          keytool -printcert -jarfile ../../SYAG.apk | grep SHA256
 
       - uses: actions/upload-artifact@v4
         with:
